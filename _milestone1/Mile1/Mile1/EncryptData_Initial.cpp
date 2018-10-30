@@ -27,6 +27,7 @@ int encryptData(char *data, int dataLength)
 		mov bl, 256
 		mul bl						// multiply al by 256
 		add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
+		mov gdebug1,al
 		// al is now our value to xor with the data
 
         //make sure length isnt <=0
@@ -56,7 +57,6 @@ lbl_EXIT_ZERO_LENGTH:
         jmp lbl_EXIT
 lbl_EXIT_END:
 lbl_EXIT:
-        ret
 	}
 
 	return resulti;

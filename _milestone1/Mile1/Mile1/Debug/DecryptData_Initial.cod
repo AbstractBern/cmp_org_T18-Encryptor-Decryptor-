@@ -40,6 +40,8 @@ PUBLIC	__JustMyCode_Default
 EXTRN	__RTC_CheckEsp:PROC
 EXTRN	__RTC_InitBase:PROC
 EXTRN	__RTC_Shutdown:PROC
+EXTRN	?gptrKey@@3PAEA:DWORD				; gptrKey
+EXTRN	?gptrPasswordHash@@3PAEA:DWORD			; gptrPasswordHash
 EXTRN	?gdebug1@@3EA:BYTE				; gdebug1
 EXTRN	?gdebug2@@3EA:BYTE				; gdebug2
 ;	COMDAT rtc$TMZ
@@ -107,25 +109,136 @@ _dataLength$ = 12					; size = 4
 ; 20   : 	// Also, you cannot use a lot of global variables - work with registers
 ; 21   : 
 ; 22   : 	__asm {
-; 23   :         
-; 24   : 	}
-; 25   : 
-; 26   : 	return resulti;
+; 23   : 		//calculate starting index for keyfile starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+; 24   : 		mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 
-  00033	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
+  00033	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR ?gptrPasswordHash@@3PAEA ; gptrPasswordHash
 
-; 27   : } // decryptData
+; 25   : 		xor eax, eax
 
-  00036	5f		 pop	 edi
-  00037	5e		 pop	 esi
-  00038	5b		 pop	 ebx
-  00039	81 c4 cc 00 00
+  00039	33 c0		 xor	 eax, eax
+
+; 26   : 		mov al, byte ptr[esi]		// store gPassword[0] in al
+
+  0003b	8a 06		 mov	 al, BYTE PTR [esi]
+
+; 27   : 		mov bl, 256
+
+  0003d	b3 00		 mov	 bl, 0
+
+; 28   : 		mul bl						// multiply al by 256
+
+  0003f	f6 e3		 mul	 bl
+
+; 29   : 		add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
+
+  00041	02 46 01	 add	 al, BYTE PTR [esi+1]
+
+; 30   : 		mov gdebug1, al
+
+  00044	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
+
+; 31   : 		// al is now our value to xor with the data
+; 32   : 
+; 33   : 		//make sure length isnt <=0
+; 34   : 		xor ebx, ebx					// ebx will be loop control
+
+  00049	33 db		 xor	 ebx, ebx
+
+; 35   : 		mov ecx, dataLength			// ecx will be length
+
+  0004b	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
+
+; 36   : 		cmp ecx, 0					// check that length is not <= 0
+
+  0004e	83 f9 00	 cmp	 ecx, 0
+
+; 37   : 		sub ecx, 1					// decrement ecx since non-inclusive length
+
+  00051	83 e9 01	 sub	 ecx, 1
+
+; 38   : 		jbe lbl_EXIT_ZERO_LENGTH
+
+  00054	76 1b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+
+; 39   : 
+; 40   : 		//set up the loop
+; 41   : 		mov edi, data				// put address of first byte of data in edi
+
+  00056	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+
+; 42   : 		mov esi, gptrKey				// put address of gKey into esi
+
+  00059	8b 35 00 00 00
+	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
+$lbl_LOOP$4:
+
+; 43   : 		//add esi,eax				// set esi to gKey[al]; al is starting_index
+; 44   : 
+; 45   : 		//start looping through data
+; 46   : 		lbl_LOOP :
+; 47   : 		mov dl, byte ptr[edi + ebx]	// dl is now value of data[ebx]
+
+  0005f	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
+
+; 48   : 			xor dl, byte ptr[esi + eax]	// xor dl with the keyfile byte
+
+  00062	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
+
+; 49   : 			mov byte ptr[edi + ebx], dl	// copy dl back into data[ebx]
+
+  00065	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
+
+; 50   : 			add ebx, 1					// increment counter ebx
+
+  00068	83 c3 01	 add	 ebx, 1
+
+; 51   : 			cmp ebx, ecx					// check havent hit end of data
+
+  0006b	3b d9		 cmp	 ebx, ecx
+
+; 52   : 			ja lbl_EXIT_END
+
+  0006d	77 07		 ja	 SHORT $lbl_EXIT_END$5
+
+; 53   : 			jmp lbl_LOOP				// otherwise keep looping
+
+  0006f	eb ee		 jmp	 SHORT $lbl_LOOP$4
+$lbl_EXIT_ZERO_LENGTH$3:
+
+; 54   : 
+; 55   : 			lbl_EXIT_ZERO_LENGTH :
+; 56   : 		sub ebx, 1					// decrement ebx to -1 to return failure
+
+  00071	83 eb 01	 sub	 ebx, 1
+
+; 57   : 			jmp lbl_EXIT
+
+  00074	eb 00		 jmp	 SHORT $lbl_EXIT$6
+$lbl_EXIT_END$5:
+$lbl_EXIT$6:
+
+; 58   : 			lbl_EXIT_END :
+; 59   : 	lbl_EXIT:
+; 60   : 	}
+; 61   : 
+; 62   : 	return resulti;
+
+  00076	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
+
+; 63   : } // decryptData
+
+  00079	5f		 pop	 edi
+  0007a	5e		 pop	 esi
+  0007b	5b		 pop	 ebx
+  0007c	81 c4 cc 00 00
 	00		 add	 esp, 204		; 000000ccH
-  0003f	3b ec		 cmp	 ebp, esp
-  00041	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  00046	8b e5		 mov	 esp, ebp
-  00048	5d		 pop	 ebp
-  00049	c3		 ret	 0
+  00082	3b ec		 cmp	 ebp, esp
+  00084	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  00089	8b e5		 mov	 esp, ebp
+  0008b	5d		 pop	 ebp
+  0008c	c3		 ret	 0
 ?decryptData@@YAHPADH@Z ENDP				; decryptData
 _TEXT	ENDS
 END

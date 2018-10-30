@@ -135,110 +135,110 @@ _dataLength$ = 12					; size = 4
 
   00041	02 46 01	 add	 al, BYTE PTR [esi+1]
 
-; 30   : 		// al is now our value to xor with the data
-; 31   : 
-; 32   :         //make sure length isnt <=0
-; 33   :         xor ebx,ebx					// ebx will be loop control
+; 30   : 		mov gdebug1,al
 
-  00044	33 db		 xor	 ebx, ebx
+  00044	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
 
-; 34   :         mov ecx,dataLength			// ecx will be length
+; 31   : 		// al is now our value to xor with the data
+; 32   : 
+; 33   :         //make sure length isnt <=0
+; 34   :         xor ebx,ebx					// ebx will be loop control
 
-  00046	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
+  00049	33 db		 xor	 ebx, ebx
 
-; 35   :         cmp ecx,0					// check that length is not <= 0
+; 35   :         mov ecx,dataLength			// ecx will be length
 
-  00049	83 f9 00	 cmp	 ecx, 0
+  0004b	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
 
-; 36   : 		sub ecx,1					// decrement ecx since non-inclusive length
+; 36   :         cmp ecx,0					// check that length is not <= 0
 
-  0004c	83 e9 01	 sub	 ecx, 1
+  0004e	83 f9 00	 cmp	 ecx, 0
 
-; 37   :         jbe lbl_EXIT_ZERO_LENGTH
+; 37   : 		sub ecx,1					// decrement ecx since non-inclusive length
 
-  0004f	76 1b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+  00051	83 e9 01	 sub	 ecx, 1
 
-; 38   :         
-; 39   :         //set up the loop
-; 40   :         mov edi,data				// put address of first byte of data in edi
+; 38   :         jbe lbl_EXIT_ZERO_LENGTH
 
-  00051	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+  00054	76 1b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
 
-; 41   :         mov esi,gptrKey				// put address of gKey into esi
+; 39   :         
+; 40   :         //set up the loop
+; 41   :         mov edi,data				// put address of first byte of data in edi
 
-  00054	8b 35 00 00 00
+  00056	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+
+; 42   :         mov esi,gptrKey				// put address of gKey into esi
+
+  00059	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
 $lbl_LOOP$4:
 
-; 42   :         //add esi,eax				// set esi to gKey[al]; al is starting_index
-; 43   : 
-; 44   :         //start looping through data
-; 45   : lbl_LOOP:
-; 46   :         mov dl,byte ptr[edi + ebx]	// dl is now value of data[ebx]
+; 43   :         //add esi,eax				// set esi to gKey[al]; al is starting_index
+; 44   : 
+; 45   :         //start looping through data
+; 46   : lbl_LOOP:
+; 47   :         mov dl,byte ptr[edi + ebx]	// dl is now value of data[ebx]
 
-  0005a	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
+  0005f	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
 
-; 47   :         xor dl,byte ptr[esi+eax]	// xor dl with the keyfile byte
+; 48   :         xor dl,byte ptr[esi+eax]	// xor dl with the keyfile byte
 
-  0005d	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
+  00062	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
 
-; 48   :         mov byte ptr[edi + ebx],dl	// copy dl back into data[ebx]
+; 49   :         mov byte ptr[edi + ebx],dl	// copy dl back into data[ebx]
 
-  00060	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
+  00065	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
 
-; 49   :         add ebx,1					// increment counter ebx
+; 50   :         add ebx,1					// increment counter ebx
 
-  00063	83 c3 01	 add	 ebx, 1
+  00068	83 c3 01	 add	 ebx, 1
 
-; 50   :         cmp ebx,ecx					// check havent hit end of data
+; 51   :         cmp ebx,ecx					// check havent hit end of data
 
-  00066	3b d9		 cmp	 ebx, ecx
+  0006b	3b d9		 cmp	 ebx, ecx
 
-; 51   :         ja lbl_EXIT_END
+; 52   :         ja lbl_EXIT_END
 
-  00068	77 07		 ja	 SHORT $lbl_EXIT_END$5
+  0006d	77 07		 ja	 SHORT $lbl_EXIT_END$5
 
-; 52   :         jmp lbl_LOOP				// otherwise keep looping
+; 53   :         jmp lbl_LOOP				// otherwise keep looping
 
-  0006a	eb ee		 jmp	 SHORT $lbl_LOOP$4
+  0006f	eb ee		 jmp	 SHORT $lbl_LOOP$4
 $lbl_EXIT_ZERO_LENGTH$3:
 
-; 53   :         
-; 54   : lbl_EXIT_ZERO_LENGTH:
-; 55   :         sub ebx,1					// decrement ebx to -1 to return failure
+; 54   :         
+; 55   : lbl_EXIT_ZERO_LENGTH:
+; 56   :         sub ebx,1					// decrement ebx to -1 to return failure
 
-  0006c	83 eb 01	 sub	 ebx, 1
+  00071	83 eb 01	 sub	 ebx, 1
 
-; 56   :         jmp lbl_EXIT
+; 57   :         jmp lbl_EXIT
 
-  0006f	eb 00		 jmp	 SHORT $lbl_EXIT$6
+  00074	eb 00		 jmp	 SHORT $lbl_EXIT$6
 $lbl_EXIT_END$5:
 $lbl_EXIT$6:
 
-; 57   : lbl_EXIT_END:
-; 58   : lbl_EXIT:
-; 59   :         ret
-
-  00071	c3		 ret	 0
-
+; 58   : lbl_EXIT_END:
+; 59   : lbl_EXIT:
 ; 60   : 	}
 ; 61   : 
 ; 62   : 	return resulti;
 
-  00072	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
+  00076	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
 
 ; 63   : } // encryptData
 
-  00075	5f		 pop	 edi
-  00076	5e		 pop	 esi
-  00077	5b		 pop	 ebx
-  00078	81 c4 cc 00 00
+  00079	5f		 pop	 edi
+  0007a	5e		 pop	 esi
+  0007b	5b		 pop	 ebx
+  0007c	81 c4 cc 00 00
 	00		 add	 esp, 204		; 000000ccH
-  0007e	3b ec		 cmp	 ebp, esp
-  00080	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  00085	8b e5		 mov	 esp, ebp
-  00087	5d		 pop	 ebp
-  00088	c3		 ret	 0
+  00082	3b ec		 cmp	 ebp, esp
+  00084	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  00089	8b e5		 mov	 esp, ebp
+  0008b	5d		 pop	 ebp
+  0008c	c3		 ret	 0
 ?encryptData@@YAHPADH@Z ENDP				; encryptData
 _TEXT	ENDS
 END
