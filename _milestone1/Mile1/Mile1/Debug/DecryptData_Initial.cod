@@ -37,15 +37,11 @@ __1F774963_decryptdata_initial@cpp DB 01H
 msvcjmc	ENDS
 PUBLIC	?decryptData@@YAHPADH@Z				; decryptData
 PUBLIC	__JustMyCode_Default
-EXTRN	@__security_check_cookie@4:PROC
 EXTRN	__RTC_CheckEsp:PROC
 EXTRN	__RTC_InitBase:PROC
 EXTRN	__RTC_Shutdown:PROC
-EXTRN	?gptrKey@@3PAEA:DWORD				; gptrKey
-EXTRN	?gptrPasswordHash@@3PAEA:DWORD			; gptrPasswordHash
 EXTRN	?gdebug1@@3EA:BYTE				; gdebug1
 EXTRN	?gdebug2@@3EA:BYTE				; gdebug2
-EXTRN	___security_cookie:DWORD
 ;	COMDAT rtc$TMZ
 rtc$TMZ	SEGMENT
 __RTC_Shutdown.rtc$TMZ DD FLAT:__RTC_Shutdown
@@ -68,8 +64,7 @@ _TEXT	ENDS
 ; File c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone1\mile1\mile1\decryptdata_initial.cpp
 ;	COMDAT ?decryptData@@YAHPADH@Z
 _TEXT	SEGMENT
-_resulti$ = -12						; size = 4
-__$ArrayPad$ = -4					; size = 4
+_resulti$ = -8						; size = 4
 _data$ = 8						; size = 4
 _dataLength$ = 12					; size = 4
 ?decryptData@@YAHPADH@Z PROC				; decryptData, COMDAT
@@ -78,34 +73,31 @@ _dataLength$ = 12					; size = 4
 
   00000	55		 push	 ebp
   00001	8b ec		 mov	 ebp, esp
-  00003	81 ec d0 00 00
-	00		 sub	 esp, 208		; 000000d0H
+  00003	81 ec cc 00 00
+	00		 sub	 esp, 204		; 000000ccH
   00009	53		 push	 ebx
   0000a	56		 push	 esi
   0000b	57		 push	 edi
-  0000c	8d bd 30 ff ff
-	ff		 lea	 edi, DWORD PTR [ebp-208]
-  00012	b9 34 00 00 00	 mov	 ecx, 52			; 00000034H
+  0000c	8d bd 34 ff ff
+	ff		 lea	 edi, DWORD PTR [ebp-204]
+  00012	b9 33 00 00 00	 mov	 ecx, 51			; 00000033H
   00017	b8 cc cc cc cc	 mov	 eax, -858993460		; ccccccccH
   0001c	f3 ab		 rep stosd
-  0001e	a1 00 00 00 00	 mov	 eax, DWORD PTR ___security_cookie
-  00023	33 c5		 xor	 eax, ebp
-  00025	89 45 fc	 mov	 DWORD PTR __$ArrayPad$[ebp], eax
 
 ; 12   : 	int resulti = 0;
 
-  00028	c7 45 f4 00 00
+  0001e	c7 45 f8 00 00
 	00 00		 mov	 DWORD PTR _resulti$[ebp], 0
 
 ; 13   : 
 ; 14   : 	gdebug1 = 0;					// a couple of global variables that could be used for debugging
 
-  0002f	c6 05 00 00 00
+  00025	c6 05 00 00 00
 	00 00		 mov	 BYTE PTR ?gdebug1@@3EA, 0 ; gdebug1
 
 ; 15   : 	gdebug2 = 0;					// also can have a breakpoint in C code
 
-  00036	c6 05 00 00 00
+  0002c	c6 05 00 00 00
 	00 00		 mov	 BYTE PTR ?gdebug2@@3EA, 0 ; gdebug2
 
 ; 16   : 
@@ -115,145 +107,25 @@ _dataLength$ = 12					; size = 4
 ; 20   : 	// Also, you cannot use a lot of global variables - work with registers
 ; 21   : 
 ; 22   : 	__asm {
-; 23   :         //make sure length isnt <=0
-; 24   :         xor ebx,ebx                 //set ebx to 0, using as return and counter
+; 23   :         
+; 24   : 	}
+; 25   : 
+; 26   : 	return resulti;
 
-  0003d	33 db		 xor	 ebx, ebx
+  00033	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
 
-; 25   :         mov ecx,dataLength          //set ecx to length
+; 27   : } // decryptData
 
-  0003f	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
-
-; 26   :         cmp ecx,0                   //check that length is not <= 0
-
-  00042	83 f9 00	 cmp	 ecx, 0
-
-; 27   :         jbe lbl_EXIT_ZERO_LENGTH
-
-  00045	76 2d		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
-
-; 28   :         
-; 29   :         //calculate starting index for keyfile starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
-; 30   :         mov esi,gptrPasswordHash    // put address of gPasswordHas into esi
-
-  00047	8b 35 00 00 00
-	00		 mov	 esi, DWORD PTR ?gptrPasswordHash@@3PAEA ; gptrPasswordHash
-
-; 31   :         xor eax,eax
-
-  0004d	33 c0		 xor	 eax, eax
-
-; 32   :         mov al,byte ptr[esi]        // store gPassword[0] in al
-
-  0004f	8a 06		 mov	 al, BYTE PTR [esi]
-
-; 33   :         mov dl,256
-
-  00051	b2 00		 mov	 dl, 0
-
-; 34   :         mul dl                      // multiply al by 256
-
-  00053	f6 e2		 mul	 dl
-
-; 35   :         add al,byte ptr[esi+1]      // add gPassword[1] to al, al is now starting index for keyfile
-
-  00055	02 46 01	 add	 al, BYTE PTR [esi+1]
-
-; 36   :         
-; 37   :         //set up the loop
-; 38   :         mov edi,data                // put address of first byte of data in edi
-
-  00058	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
-
-; 39   :         mov esi,gptrKey             // put address of gKey into esi
-
-  0005b	8b 35 00 00 00
-	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
-
-; 40   :         add esi,eax                  // set esi to gKey[al]; al is starting_index
-
-  00061	03 f0		 add	 esi, eax
-$lbl_LOOP$4:
-
-; 41   : 
-; 42   :         //start looping through data
-; 43   : lbl_LOOP:
-; 44   :         mov dl,byte ptr[edi + 4 * ebx] //dl is now value of data[ebx]
-
-  00063	8a 14 9f	 mov	 dl, BYTE PTR [edi+ebx*4]
-
-; 45   :         xor dl,byte ptr[esi]        // xor tdl with the keyfile byte
-
-  00066	32 16		 xor	 dl, BYTE PTR [esi]
-
-; 46   :         mov byte ptr[edi + 4 * ebx],dl //copy dl back into data[ebx]
-
-  00068	88 14 9f	 mov	 BYTE PTR [edi+ebx*4], dl
-
-; 47   :         add ebx,1                   // increment counter ebx
-
-  0006b	83 c3 01	 add	 ebx, 1
-
-; 48   :         cmp ebx,ecx                 // check havent hit end of data
-
-  0006e	3b d9		 cmp	 ebx, ecx
-
-; 49   :         ja lbl_EXIT_END                     
-
-  00070	77 07		 ja	 SHORT $lbl_EXIT_END$5
-
-; 50   :         jmp lbl_LOOP                // otherwise keep looping
-
-  00072	eb ef		 jmp	 SHORT $lbl_LOOP$4
-$lbl_EXIT_ZERO_LENGTH$3:
-
-; 51   :         
-; 52   : lbl_EXIT_ZERO_LENGTH:
-; 53   :         sub ebx,1                   // decrement ebx to -1 to return failure
-
-  00074	83 eb 01	 sub	 ebx, 1
-
-; 54   :         jmp lbl_EXIT
-
-  00077	eb 02		 jmp	 SHORT $lbl_EXIT$6
-$lbl_EXIT_END$5:
-
-; 55   : lbl_EXIT_END:
-; 56   :         xor ebx,ebx                 // set ebx back to 0
-
-  00079	33 db		 xor	 ebx, ebx
-$lbl_EXIT$6:
-
-; 57   : lbl_EXIT:
-; 58   :         mov resulti,ebx             // set returni value (0 worked, -1 length invalid)
-
-  0007b	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
-
-; 59   :         ret                         // return
-
-  0007e	c3		 ret	 0
-
-; 60   : 	}
-; 61   : 
-; 62   : 	return resulti;
-
-  0007f	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
-
-; 63   : } // decryptData
-
-  00082	5f		 pop	 edi
-  00083	5e		 pop	 esi
-  00084	5b		 pop	 ebx
-  00085	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
-  00088	33 cd		 xor	 ecx, ebp
-  0008a	e8 00 00 00 00	 call	 @__security_check_cookie@4
-  0008f	81 c4 d0 00 00
-	00		 add	 esp, 208		; 000000d0H
-  00095	3b ec		 cmp	 ebp, esp
-  00097	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  0009c	8b e5		 mov	 esp, ebp
-  0009e	5d		 pop	 ebp
-  0009f	c3		 ret	 0
+  00036	5f		 pop	 edi
+  00037	5e		 pop	 esi
+  00038	5b		 pop	 ebx
+  00039	81 c4 cc 00 00
+	00		 add	 esp, 204		; 000000ccH
+  0003f	3b ec		 cmp	 ebp, esp
+  00041	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  00046	8b e5		 mov	 esp, ebp
+  00048	5d		 pop	 ebp
+  00049	c3		 ret	 0
 ?decryptData@@YAHPADH@Z ENDP				; decryptData
 _TEXT	ENDS
 END
