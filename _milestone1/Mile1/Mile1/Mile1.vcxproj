@@ -20,6 +20,16 @@
     <ClCompile Include="EncryptData_Initial.cpp" />
     <ClCompile Include="SHA-256.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="3_SI.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="2_testHex.hex" />
+    <None Include="Key.dat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="1_testASCII.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{242E59AC-7C30-43AB-95EF-DDDB16D7756D}</ProjectGuid>
     <RootNamespace>Mile1</RootNamespace>
