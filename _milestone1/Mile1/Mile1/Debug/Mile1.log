@@ -1,18 +1,4 @@
-﻿Build started 10/30/2018 4:12:55 PM.
-     1>Project "c:\Users\umo850\documents\visual studio 2013\Projects\Mile1\Mile1\Mile1.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W2 /WX- /sdl /Od /Oy- /D _MBCS /D _MBCS /D _CRT_SECURE_NO_WARNINGS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /FAcs /Fa"Debug\\" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt V:\Project\mille1\DecryptData_Initial.cpp V:\Project\mille1\EncryptData_Initial.cpp
-         EncryptData_Initial.cpp
-         DecryptData_Initial.cpp
-         Generating Code...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"c:\users\umo850\documents\visual studio 2013\Projects\Mile1\Debug\Mile1.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\users\umo850\documents\visual studio 2013\Projects\Mile1\Debug\Mile1.pdb" /TLBID:1 /DYNAMICBASE:NO /NXCOMPAT /IMPLIB:"c:\users\umo850\documents\visual studio 2013\Projects\Mile1\Debug\Mile1.lib" /MACHINE:X86 Debug\CryptoMain_Initial.obj
-         Debug\DecryptData_Initial.obj
-         Debug\EncryptData_Initial.obj
-         "Debug\SHA-256.obj"
-         Mile1.vcxproj -> c:\users\umo850\documents\visual studio 2013\Projects\Mile1\Debug\Mile1.exe
-     1>Done Building Project "c:\Users\umo850\documents\visual studio 2013\Projects\Mile1\Mile1\Mile1.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:01.14
+﻿  DecryptData_Initial.cpp
+  EncryptData_Initial.cpp
+  Generating Code...
+  Mile1.vcxproj -> C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone1\Mile1\Debug\Mile1.exe

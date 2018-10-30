@@ -1,2 +1,2 @@
-#TargetFrameworkVersion=v4.0:PlatformToolSet=v120:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit
-Debug|Win32|c:\users\umo850\documents\visual studio 2013\Projects\Mile1\|
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v141:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=10.0.17134.0
+Debug|Win32|C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone1\Mile1\|
