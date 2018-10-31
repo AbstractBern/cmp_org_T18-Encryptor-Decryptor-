@@ -2,7 +2,7 @@
 ### Team: 18
 ### CryptoOrder: CDEBA
 
-## Milestone 1 - November 2 COMPLETE
+## Milestone 1 - November 2 **COMPLETE**
   * Working program that accesses input file data and applies a simple encryption/decryption.
   * Assembly code to xor every byte of data with the byte at keyfile[starting_index].
   * starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
@@ -11,8 +11,8 @@
   - Team_18_CS3843_Project_01.exe
   - Any modified C++ files.
 ### Testing Program:
-  - Run TesterScript.bat in _\_milestone1/Test/_
-  - This will create several files in _\_milestone1/Test/_ folder
+  - Run **\_TesterScript.bat** in _\_milestone1/Test/_
+  - This will create several files in **_\_milestone1/Test/_** folder
 
 ## Milestone 2 - November 16
   * Milestone 1
