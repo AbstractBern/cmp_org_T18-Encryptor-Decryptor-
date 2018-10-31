@@ -1,6 +1,6 @@
 # Encryptor Decryptor Project
 ### Team: 18
-## CryptoOrder: CDEBA
+### CryptoOrder: CDEBA
 ## Milestones:
   - 1:  November 2
   - 2:  November 16
