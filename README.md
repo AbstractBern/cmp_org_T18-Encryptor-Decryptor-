@@ -1,11 +1,7 @@
 # Encryptor Decryptor Project
 ### Team: 18
 ### CryptoOrder: CDEBA
-## Milestones:
-  - 1:  November 2
-  - 2:  November 16
-  - 3:  November 30
-  - Final:  December 5
+
 ## Milestone 1 - November 2
   * Working program that accesses input file data and applies a simple encryption/decryption.
   * Assembly code to xor every byte of data with the byte at keyfile[starting_index].
