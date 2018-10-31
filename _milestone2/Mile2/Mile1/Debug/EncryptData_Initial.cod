@@ -37,6 +37,7 @@ __4D762EE4_encryptdata_initial@cpp DB 01H
 msvcjmc	ENDS
 PUBLIC	?encryptData@@YAHPADH@Z				; encryptData
 PUBLIC	__JustMyCode_Default
+EXTRN	@__security_check_cookie@4:PROC
 EXTRN	__RTC_CheckEsp:PROC
 EXTRN	__RTC_InitBase:PROC
 EXTRN	__RTC_Shutdown:PROC
@@ -44,6 +45,7 @@ EXTRN	?gptrKey@@3PAEA:DWORD				; gptrKey
 EXTRN	?gptrPasswordHash@@3PAEA:DWORD			; gptrPasswordHash
 EXTRN	?gdebug1@@3EA:BYTE				; gdebug1
 EXTRN	?gdebug2@@3EA:BYTE				; gdebug2
+EXTRN	___security_cookie:DWORD
 ;	COMDAT rtc$TMZ
 rtc$TMZ	SEGMENT
 __RTC_Shutdown.rtc$TMZ DD FLAT:__RTC_Shutdown
@@ -66,7 +68,8 @@ _TEXT	ENDS
 ; File c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp
 ;	COMDAT ?encryptData@@YAHPADH@Z
 _TEXT	SEGMENT
-_resulti$ = -8						; size = 4
+_resulti$ = -12						; size = 4
+__$ArrayPad$ = -4					; size = 4
 _data$ = 8						; size = 4
 _dataLength$ = 12					; size = 4
 ?encryptData@@YAHPADH@Z PROC				; encryptData, COMDAT
@@ -75,31 +78,34 @@ _dataLength$ = 12					; size = 4
 
   00000	55		 push	 ebp
   00001	8b ec		 mov	 ebp, esp
-  00003	81 ec cc 00 00
-	00		 sub	 esp, 204		; 000000ccH
+  00003	81 ec d0 00 00
+	00		 sub	 esp, 208		; 000000d0H
   00009	53		 push	 ebx
   0000a	56		 push	 esi
   0000b	57		 push	 edi
-  0000c	8d bd 34 ff ff
-	ff		 lea	 edi, DWORD PTR [ebp-204]
-  00012	b9 33 00 00 00	 mov	 ecx, 51			; 00000033H
+  0000c	8d bd 30 ff ff
+	ff		 lea	 edi, DWORD PTR [ebp-208]
+  00012	b9 34 00 00 00	 mov	 ecx, 52			; 00000034H
   00017	b8 cc cc cc cc	 mov	 eax, -858993460		; ccccccccH
   0001c	f3 ab		 rep stosd
+  0001e	a1 00 00 00 00	 mov	 eax, DWORD PTR ___security_cookie
+  00023	33 c5		 xor	 eax, ebp
+  00025	89 45 fc	 mov	 DWORD PTR __$ArrayPad$[ebp], eax
 
 ; 12   : 	int resulti = 0;
 
-  0001e	c7 45 f8 00 00
+  00028	c7 45 f4 00 00
 	00 00		 mov	 DWORD PTR _resulti$[ebp], 0
 
 ; 13   : 
 ; 14   : 	gdebug1 = 0;					// a couple of global variables that could be used for debugging
 
-  00025	c6 05 00 00 00
+  0002f	c6 05 00 00 00
 	00 00		 mov	 BYTE PTR ?gdebug1@@3EA, 0 ; gdebug1
 
 ; 15   : 	gdebug2 = 0;					// also can have a breakpoint in C code
 
-  0002c	c6 05 00 00 00
+  00036	c6 05 00 00 00
 	00 00		 mov	 BYTE PTR ?gdebug2@@3EA, 0 ; gdebug2
 
 ; 16   : 
@@ -109,172 +115,313 @@ _dataLength$ = 12					; size = 4
 ; 20   : 	// Also, you cannot use a lot of global variables - work with registers
 ; 21   : 
 ; 22   : 	__asm {
-; 23   : 		//calculate starting index for keyfile starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
-; 24   : 		mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
+; 23   : mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 
-  00033	8b 35 00 00 00
+  0003d	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrPasswordHash@@3PAEA ; gptrPasswordHash
 
-; 25   : 		xor eax, eax
+; 24   : 			xor eax, eax				//
 
-  00039	33 c0		 xor	 eax, eax
+  00043	33 c0		 xor	 eax, eax
 
-; 26   : 		mov al, byte ptr[esi]		// store gPassword[0] in al
+; 25   : 			mov al, byte ptr[esi]		// store gPassword[0] in al
 
-  0003b	8a 06		 mov	 al, BYTE PTR [esi]
+  00045	8a 06		 mov	 al, BYTE PTR [esi]
 
-; 27   : 		mov bl, 256
+; 26   : 			mov bl, 256					//
 
-  0003d	b3 00		 mov	 bl, 0
+  00047	b3 00		 mov	 bl, 0
 
-; 28   : 		mul bl						// multiply al by 256
+; 27   : 			mul bl						// multiply al by 256
 
-  0003f	f6 e3		 mul	 bl
+  00049	f6 e3		 mul	 bl
 
-; 29   : 		add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
+; 28   : 			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
 
-  00041	02 46 01	 add	 al, BYTE PTR [esi+1]
+  0004b	02 46 01	 add	 al, BYTE PTR [esi+1]
 
-; 30   : 		mov gdebug1,al
+; 29   : 			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 
-  00044	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
+  0004e	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
 
-; 31   : 		// al is now our value to xor with the data
-; 32   : 
-; 33   :         //make sure length isnt <=0
-; 34   :         xor ebx,ebx					// ebx will be loop control
+; 30   : 
+; 31   : 			xor ebx, ebx				// ebx = control variable (loop)
 
-  00049	33 db		 xor	 ebx, ebx
+  00053	33 db		 xor	 ebx, ebx
 
-; 35   :         mov ecx,dataLength			// ecx will be length
+; 32   : 			mov ecx, dataLength			// ecx = length
 
-  0004b	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
+  00055	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
 
-; 36   :         cmp ecx,0					// check that length is not <= 0
+; 33   : 			cmp ecx, 0					// check that length is not <= 0
 
-  0004e	83 f9 00	 cmp	 ecx, 0
+  00058	83 f9 00	 cmp	 ecx, 0
 
-; 37   : 		sub ecx,1					// decrement ecx since non-inclusive length
+; 34   : 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
 
-  00051	83 e9 01	 sub	 ecx, 1
+  0005b	83 e9 01	 sub	 ecx, 1
 
-; 38   :         jbe lbl_EXIT_ZERO_LENGTH
+; 35   : 			jbe lbl_EXIT_ZERO_LENGTH	//
 
-  00054	76 22		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+  0005e	76 61		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
 
-; 39   :         
-; 40   :         //set up the loop
-; 41   :         mov edi,data				// put address of first byte of data in edi
+; 36   : 
+; 37   : 			mov edi, data				// put address of first byte of data in edi
 
-  00056	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+  00060	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
 
-; 42   :         mov esi,gptrKey				// put address of gKey into esi
+; 38   : 			mov esi, gptrKey			// put address of gKey into esi
 
-  00059	8b 35 00 00 00
+  00063	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
-
-; 43   :         add esi,eax					// set esi to gKey[al]; al is starting_index
-
-  0005f	03 f0		 add	 esi, eax
 $lbl_LOOP$4:
 
-; 44   : 
-; 45   :         // start looping through data
-; 46   : lbl_LOOP:
-; 47   :         mov dl,byte ptr[edi + ebx]	// dl is now value of data[ebx]
+; 39   : 
+; 40   : 		//
+; 41   : 		// LOOP THROUGH ENTIRE data[] BYTE BY BYTE
+; 42   : 		//
+; 43   : lbl_LOOP :
+; 44   : 			mov dl, byte ptr[edi + ebx]	//
 
-  00061	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
+  00069	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
 
-; 48   :         xor dl,byte ptr[esi+eax]	// xor dl with the keyfile byte
+; 45   : 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
 
-  00064	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
+  0006c	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
 
-; 49   :         mov byte ptr[edi + ebx],dl	// copy dl back into data[ebx]
+; 46   : 			mov byte ptr[edi + ebx], dl	//
 
-  00067	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
+  0006f	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
 
-; 50   : 		// do 5 steps
-; 51   : 		//
-; 52   :         add ebx,1					// increment counter ebx
+; 47   : 
+; 48   : 			push edx					//	
 
-  0006a	83 c3 01	 add	 ebx, 1
+  00072	52		 push	 edx
 
-; 53   :         cmp ebx,ecx					// check havent hit end of data
+; 49   : 			call stepC					//	C
 
-  0006d	3b d9		 cmp	 ebx, ecx
+  00073	e8 3a 00 00 00	 call	 $stepC$5
 
-; 54   :         ja lbl_EXIT_END
+; 50   : 			add esp, 4					//   
 
-  0006f	77 0c		 ja	 SHORT $lbl_EXIT_END$5
+  00078	83 c4 04	 add	 esp, 4
 
-; 55   :         jmp lbl_LOOP				// otherwise keep looping
+; 51   : 
+; 52   : 			push edx					//	
 
-  00071	eb ee		 jmp	 SHORT $lbl_LOOP$4
-$stepA$6:
+  0007b	52		 push	 edx
 
-; 56   :         
-; 57   : 
-; 58   : stepA:
-; 59   : 		push ebp
+; 53   : 			call stepD					//	D
 
-  00073	55		 push	 ebp
+  0007c	e8 36 00 00 00	 call	 $stepD$6
 
-; 60   : 		mov ebp,esp					//set up stack frame
+; 54   : 			add esp, 4					//	
 
-  00074	8b ec		 mov	 ebp, esp
+  00081	83 c4 04	 add	 esp, 4
 
-; 61   : 
-; 62   : 		pop ebp						//restore stack frame
+; 55   : 
+; 56   : 			push edx					//
 
-  00076	5d		 pop	 ebp
+  00084	52		 push	 edx
 
-; 63   : 		ret
+; 57   : 			call stepE					//	E
 
-  00077	c3		 ret	 0
-$stepB$7:
-$stepC$8:
-$stepD$9:
+  00085	e8 32 00 00 00	 call	 $stepE$7
+
+; 58   : 			add esp, 4					//
+
+  0008a	83 c4 04	 add	 esp, 4
+
+; 59   : 
+; 60   : 			push edx					//
+
+  0008d	52		 push	 edx
+
+; 61   : 			call stepB					//	B
+
+  0008e	e8 1a 00 00 00	 call	 $stepB$8
+
+; 62   : 			add esp, 4					//
+
+  00093	83 c4 04	 add	 esp, 4
+
+; 63   : 
+; 64   : 			push edx					//
+
+  00096	52		 push	 edx
+
+; 65   : 			call stepA					//	A
+
+  00097	e8 0c 00 00 00	 call	 $stepA$9
+
+; 66   : 			add esp, 4					//
+
+  0009c	83 c4 04	 add	 esp, 4
+
+; 67   : 
+; 68   : 			add ebx, 1					// ebx++
+
+  0009f	83 c3 01	 add	 ebx, 1
+
+; 69   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
+
+  000a2	3b d9		 cmp	 ebx, ecx
+
+; 70   : 			ja lbl_EXIT_END				//
+
+  000a4	77 20		 ja	 SHORT $lbl_EXIT_END$10
+
+; 71   : 			jmp lbl_LOOP				// else loop
+
+  000a6	eb c1		 jmp	 SHORT $lbl_LOOP$4
+$stepA$9:
+
+; 72   : 
+; 73   : stepA:
+; 74   : 			push ebp		// Step A - Swap even/odd bits
+
+  000a8	55		 push	 ebp
+
+; 75   : 			mov ebp,esp		// e.g.  0xA9 -> 0x56
+
+  000a9	8b ec		 mov	 ebp, esp
+
+; 76   : 			// <-math here
+; 77   : 			pop ebp			//
+
+  000ab	5d		 pop	 ebp
+
+; 78   : 			ret				//
+
+  000ac	c3		 ret	 0
+$stepB$8:
+
+; 79   : 
+; 80   : stepB:
+; 81   : 			push ebp		// Step B - Invert middle 4 bits
+
+  000ad	55		 push	 ebp
+
+; 82   : 			mov ebp,esp		// e.g. 0x56 -> 0x6A
+
+  000ae	8b ec		 mov	 ebp, esp
+
+; 83   : 			// <-math here
+; 84   : 			pop ebp			//
+
+  000b0	5d		 pop	 ebp
+
+; 85   : 			ret				//
+
+  000b1	c3		 ret	 0
+$stepC$5:
+
+; 86   : 
+; 87   : stepC:
+; 88   : 			push ebp		// Step C - Swap nibbles
+
+  000b2	55		 push	 ebp
+
+; 89   : 			mov ebp,esp		// e.g. 0x6A -> 0xA6
+
+  000b3	8b ec		 mov	 ebp, esp
+
+; 90   : 			// <-math here
+; 91   : 			pop ebp			//
+
+  000b5	5d		 pop	 ebp
+
+; 92   : 			ret				//
+
+  000b6	c3		 ret	 0
+$stepD$6:
+
+; 93   : 
+; 94   : stepD:
+; 95   : 			push ebp		// Step D - Code Table Swap
+
+  000b7	55		 push	 ebp
+
+; 96   : 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
+
+  000b8	8b ec		 mov	 ebp, esp
+
+; 97   : 			// <-math here
+; 98   : 			pop ebp			//
+
+  000ba	5d		 pop	 ebp
+
+; 99   : 			ret				//
+
+  000bb	c3		 ret	 0
+$stepE$7:
+
+; 100  : 
+; 101  : stepE:
+; 102  : 			push ebp		// Step E - Reverse Bit Order
+
+  000bc	55		 push	 ebp
+
+; 103  : 			mov ebp,esp		// e.g. 0xCA -> 0x53
+
+  000bd	8b ec		 mov	 ebp, esp
+
+; 104  : 			// <-math here
+; 105  : 			pop ebp			//
+
+  000bf	5d		 pop	 ebp
+
+; 106  : 			ret				//
+
+  000c0	c3		 ret	 0
 $lbl_EXIT_ZERO_LENGTH$3:
 
-; 64   : stepB:
-; 65   : 
-; 66   : stepC:
-; 67   : 
-; 68   : stepD:
-; 69   : 
-; 70   : 
-; 71   : 
-; 72   : lbl_EXIT_ZERO_LENGTH:
-; 73   :         sub ebx,1					// decrement ebx to -1 to return failure
+; 107  : 
+; 108  : 
+; 109  : lbl_EXIT_ZERO_LENGTH :
+; 110  : 			sub ebx, 1		// decrement ebx to -1 to return failure
 
-  00078	83 eb 01	 sub	 ebx, 1
+  000c1	83 eb 01	 sub	 ebx, 1
 
-; 74   :         jmp lbl_EXIT
+; 111  : 			jmp lbl_EXIT	//
 
-  0007b	eb 00		 jmp	 SHORT $lbl_EXIT$10
-$lbl_EXIT_END$5:
-$lbl_EXIT$10:
+  000c4	eb 02		 jmp	 SHORT $lbl_EXIT$11
+$lbl_EXIT_END$10:
 
-; 75   : lbl_EXIT_END:
-; 76   : lbl_EXIT:
-; 77   : 	}
-; 78   : 
-; 79   : 	return resulti;
+; 112  : 
+; 113  : lbl_EXIT_END :
+; 114  : 			xor ebx, ebx		// ebx = 0, correctly executed
 
-  0007d	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
+  000c6	33 db		 xor	 ebx, ebx
+$lbl_EXIT$11:
 
-; 80   : } // encryptData
+; 115  : 
+; 116  : lbl_EXIT :
+; 117  : 			mov resulti, ebx
 
-  00080	5f		 pop	 edi
-  00081	5e		 pop	 esi
-  00082	5b		 pop	 ebx
-  00083	81 c4 cc 00 00
-	00		 add	 esp, 204		; 000000ccH
-  00089	3b ec		 cmp	 ebp, esp
-  0008b	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  00090	8b e5		 mov	 esp, ebp
-  00092	5d		 pop	 ebp
-  00093	c3		 ret	 0
+  000c8	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
+
+; 118  : 	}
+; 119  : 
+; 120  : 	return resulti;
+
+  000cb	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
+
+; 121  : } // encryptData
+
+  000ce	5f		 pop	 edi
+  000cf	5e		 pop	 esi
+  000d0	5b		 pop	 ebx
+  000d1	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
+  000d4	33 cd		 xor	 ecx, ebp
+  000d6	e8 00 00 00 00	 call	 @__security_check_cookie@4
+  000db	81 c4 d0 00 00
+	00		 add	 esp, 208		; 000000d0H
+  000e1	3b ec		 cmp	 ebp, esp
+  000e3	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  000e8	8b e5		 mov	 esp, ebp
+  000ea	5d		 pop	 ebp
+  000eb	c3		 ret	 0
 ?encryptData@@YAHPADH@Z ENDP				; encryptData
 _TEXT	ENDS
 END
