@@ -40,7 +40,7 @@ int encryptData(char *data, int dataLength)
 			//
 			// LOOP THROUGH ENTIRE data[] BYTE BY BYTE
 			//
-lbl_LOOP:
+lbl_LOOP :
 			mov dl, byte ptr[edi + ebx]	//
 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
 			mov byte ptr[edi + ebx], dl	//
@@ -50,15 +50,15 @@ lbl_LOOP:
 			ja lbl_EXIT_END				//
 			jmp lbl_LOOP				// else loop
 
-lbl_EXIT_ZERO_LENGTH:
+lbl_EXIT_ZERO_LENGTH :
 			sub ebx, 1		// decrement ebx to -1 to return failure
 			jmp lbl_EXIT	//
 
 lbl_EXIT_END :
-			xor ebx,ebx		// ebx = 0, correctly executed
+			xor ebx, ebx	// ebx = 0, correctly executed
 
-lbl_EXIT:
-			mov resulti,ebx
+lbl_EXIT :
+			mov resulti, ebx
 	}
 
 	return resulti;

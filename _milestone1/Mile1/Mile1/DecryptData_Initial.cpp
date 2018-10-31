@@ -45,8 +45,6 @@ lbl_LOOP :
 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
 			mov byte ptr[edi + ebx], dl	//
 
-			// <- THIS IS WHERE THE 5 STEPS GO (CDEBA)
-
 			add ebx, 1					// ebx++
 			cmp ebx, ecx				// if(ebx > ecx) end loop
 			ja lbl_EXIT_END				//

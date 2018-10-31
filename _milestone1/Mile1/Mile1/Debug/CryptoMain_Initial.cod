@@ -645,7 +645,7 @@ PUBLIC	??_C@_0CA@JJGKKPID@Error?$CB?5No?5key?5file?5specified?4?6?6@ ; `string'
 PUBLIC	??_C@_0CF@NMMOLMAM@Warning?$CB?5Using?5default?5?8passwor@ ; `string'
 PUBLIC	??_C@_04EHENEAPI@?4enc@				; `string'
 PUBLIC	??_C@_04PDKEMIHM@?4dec@				; `string'
-PUBLIC	??_C@_06LPALFHPD@ABCDE?$AA@			; `string'
+PUBLIC	??_C@_06FDOPKHGH@CDEBA?$AA@			; `string'
 PUBLIC	??_C@_0BE@ILNEECEA@?6?6Crypto?5Order?3?$CFs?6?6@ ; `string'
 PUBLIC	??_C@_0CI@KLALAHPJ@Error?$CB?5Password?5not?5hashed?5corr@ ; `string'
 PUBLIC	??_C@_0DD@EONHCAAK@Error?$CB?5Length?5of?5key?5file?5is?5no@ ; `string'
@@ -699,9 +699,9 @@ CONST	SEGMENT
 ??_C@_0BE@ILNEECEA@?6?6Crypto?5Order?3?$CFs?6?6@ DB 0aH, 0aH, 'Crypto Ord'
 	DB	'er:%s', 0aH, 0aH, 00H			; `string'
 CONST	ENDS
-;	COMDAT ??_C@_06LPALFHPD@ABCDE?$AA@
+;	COMDAT ??_C@_06FDOPKHGH@CDEBA?$AA@
 CONST	SEGMENT
-??_C@_06LPALFHPD@ABCDE?$AA@ DB 'ABCDE', 00H, 00H	; `string'
+??_C@_06FDOPKHGH@CDEBA?$AA@ DB 'CDEBA', 00H, 00H	; `string'
 CONST	ENDS
 ;	COMDAT ??_C@_04PDKEMIHM@?4dec@
 CONST	SEGMENT
@@ -955,7 +955,7 @@ _main	PROC						; COMDAT
 ; 470  : 
 ; 471  : 	fprintf(stdout, "\n\nCrypto Order:%s\n\n", CRYPTO_ORDER);
 
-  00028	68 00 00 00 00	 push	 OFFSET ??_C@_06LPALFHPD@ABCDE?$AA@
+  00028	68 00 00 00 00	 push	 OFFSET ??_C@_06FDOPKHGH@CDEBA?$AA@
   0002d	68 00 00 00 00	 push	 OFFSET ??_C@_0BE@ILNEECEA@?6?6Crypto?5Order?3?$CFs?6?6@
   00032	6a 01		 push	 1
   00034	e8 00 00 00 00	 call	 ___acrt_iob_func
