@@ -46,7 +46,7 @@ lbl_LOOP :
 			// mov byte ptr[edi + ebx], dl	moved to end
 
 			push edx					//	push edx so the functions can use it
-			//call stepC					//	C
+			call stepC					//	C
 
 			//call stepD					//	D
 
@@ -99,16 +99,20 @@ stepB:									//									B
 										//											|		0110 1010	=	0x6A	;	0x56 -> 0x 6A
 
 stepC:
-			push ebp		// Step C - Swap nibbles
-			mov ebp,esp		// e.g. 0x6A -> 0xA6
-			// <-math here
-			pop ebp			//
-			ret				//
+			push ebp					// Step C - Swap nibbles			|	Example:
+			mov ebp,esp					// e.g. 0x6A -> 0xA6				|			0x6A	=	0110 1010
+			push eax					// save old eax value				|		0110 1010		a nibble is just half the byte, to swap we just rotate the byte 4 times
+			mov al,byte ptr[ebp+8]		// copy pushed value (edx)			|	ror 4				*note: can be rotated either right or left
+			ror al,4					// rotate 4 to the right			|	_____________
+			mov byte ptr[ebp+8],al		// move result into edx (on stack)	|		1010 0110	=	0xA6
+			pop eax						// restore eax						|
+			pop ebp						// restore base pointer				|			0x6A	->	0xA6
+			ret							// return							|			
 
 stepD:
-			push ebp		// Step D - Code Table Swap
-			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
-			// <-math here
+			push ebp		// Step D - Code Table Swap				
+			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]			
+			// <-math here		
 			pop ebp			//
 			ret				//
 
