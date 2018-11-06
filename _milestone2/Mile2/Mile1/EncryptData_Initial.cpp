@@ -26,7 +26,7 @@ mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 			mov bl, 256					//
 			mul bl						// multiply al by 256
 			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
-			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+										// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 
 			xor ebx, ebx				// ebx = control variable (loop)
 			mov ecx, dataLength			// ecx = length
@@ -46,11 +46,11 @@ lbl_LOOP :
 			// mov byte ptr[edi + ebx], dl	moved to end
 
 			push edx					//	push edx so the functions can use it
-			call stepC					//	C
+			//call stepC					//	C
 
-			call stepD					//	D
+			//call stepD					//	D
 
-			call stepE					//	E
+			//call stepE					//	E
 
 			call stepB					//	B
 
@@ -67,19 +67,19 @@ stepA:									//									A
 			push ebp					// Step A - Swap even/odd bits											|	Example:
 			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
 			push eax					// save old eax value													|			
-			mov al,byte ptr[ebp-2]		// eax = edx															|	0xAA	=	1010 1010			
+			mov al,byte ptr[ebp+8]		// eax = edx, using 8 b/c we have pushed esp 4 times(edx,ret,ebp,eax)	|	0xAA	=	1010 1010			
 			push ecx					// save old ecx value													|	0x55	=	0101 0101	
 			mov ch,0xAA					// 0xAA has all even bits 1 and odd 0,									|	
 										// bitwise and with this value will result in showing all even bits		|		1010 1001		1010 1001
 			and ch,al					// ch is now all the even bits of our byte								|	&	1010 1010	&	0101 0101
 			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
 										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
-			and ch,al					// cl is not all the odd bits of our byte								|	
+			and cl,al					// cl is not all the odd bits of our byte								|	
 			shr ch,1					// shift all even bits right 1 time										|	>>	1010 1000 	<<	0000 0001
 			shl cl,1					// shift all odd bits left 1 time										|	_____________	_____________
 			or cl,ch					// combine them back together											|		0101 0100		0000 0010
 			mov al,cl                   // al is now out byte with even and odd bits swapped					|						
-			mov byte ptr[ebp-2],al		// move result back into edx (stack location)							|		0101 0100
+			mov byte ptr[ebp+8],al		// move result back into edx (stack location)							|		0101 0100
 			pop ecx						// restore ecx															|	|	0000 0010	
 			pop eax						// restore eax															|	_____________
 			pop ebp						// restore base pointer													|		0101 0110	=	0x5
@@ -89,9 +89,9 @@ stepB:									//									B
 			push ebp					// Step B - Invert middle 4 bits			|	Example:
 			mov ebp,esp					// e.g. 0x56 -> 0x6A						|			0x56	=	0101 0110
 			push eax					// save old eax value						|	1 ^ 1 = 0		
-			mov al,byte ptr[ebp-2]		// eax = edx								|   1 ^ 0 = 1		XOR'ing any binary value with a 0 will result in no change
+			mov al,byte ptr[ebp+8]		// eax = edx, 8b/c (see stepA)				|   1 ^ 0 = 1		XOR'ing any binary value with a 0 will result in no change
 			xor al,00111100b			// this inverts the middle 4 bits			|	0 ^ 0 = 0		XOR'ing any binary value with a 1 will invert the bit
-			mov byte ptr[ebp-2],al		// move result into edx (on the stack)		|	0 ^ 1 = 1		So, using XOR'ing our byte with 0011 1100 will invert
+			mov byte ptr[ebp+8],al		// move result into edx (on the stack)		|	0 ^ 1 = 1		So, using XOR'ing our byte with 0011 1100 will invert
 			pop eax						// restore eax								|					the middle 4 bits
 			pop ebp						// restore base pointer						|		0101 0110
 			ret							// return									|	^	0011 1100
@@ -125,7 +125,7 @@ lbl_EXIT_ZERO_LENGTH :
 			jmp lbl_EXIT	//
 
 lbl_EXIT_END :
-			xor ebx, ebx		// ebx = 0, correctly executed
+			xor ebx, ebx	// ebx = 0, correctly executed
 
 lbl_EXIT :
 			mov resulti, ebx

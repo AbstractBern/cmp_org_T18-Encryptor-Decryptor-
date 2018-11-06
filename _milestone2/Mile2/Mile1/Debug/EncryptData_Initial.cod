@@ -140,39 +140,36 @@ _dataLength$ = 12					; size = 4
 
   0004b	02 46 01	 add	 al, BYTE PTR [esi+1]
 
-; 29   : 			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
-
-  0004e	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
-
+; 29   : 										// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 ; 30   : 
 ; 31   : 			xor ebx, ebx				// ebx = control variable (loop)
 
-  00053	33 db		 xor	 ebx, ebx
+  0004e	33 db		 xor	 ebx, ebx
 
 ; 32   : 			mov ecx, dataLength			// ecx = length
 
-  00055	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
+  00050	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
 
 ; 33   : 			cmp ecx, 0					// check that length is not <= 0
 
-  00058	83 f9 00	 cmp	 ecx, 0
+  00053	83 f9 00	 cmp	 ecx, 0
 
 ; 34   : 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
 
-  0005b	83 e9 01	 sub	 ecx, 1
+  00056	83 e9 01	 sub	 ecx, 1
 
 ; 35   : 			jbe lbl_EXIT_ZERO_LENGTH	//
 
-  0005e	76 73		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+  00059	76 64		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
 
 ; 36   : 
 ; 37   : 			mov edi, data				// put address of first byte of data in edi
 
-  00060	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+  0005b	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
 
 ; 38   : 			mov esi, gptrKey			// put address of gKey into esi
 
-  00063	8b 35 00 00 00
+  0005e	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
 $lbl_LOOP$4:
 
@@ -183,244 +180,235 @@ $lbl_LOOP$4:
 ; 43   : lbl_LOOP :
 ; 44   : 			mov dl, byte ptr[edi + ebx]	//
 
-  00069	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
+  00064	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
 
 ; 45   : 			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
 
-  0006c	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
+  00067	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
 
 ; 46   : 			// mov byte ptr[edi + ebx], dl	moved to end
 ; 47   : 
 ; 48   : 			push edx					//	push edx so the functions can use it
 
-  0006f	52		 push	 edx
+  0006a	52		 push	 edx
 
-; 49   : 			call stepC					//	C
-
-  00070	e8 4f 00 00 00	 call	 $stepC$5
-
+; 49   : 			//call stepC					//	C
 ; 50   : 
-; 51   : 			call stepD					//	D
-
-  00075	e8 4f 00 00 00	 call	 $stepD$6
-
+; 51   : 			//call stepD					//	D
 ; 52   : 
-; 53   : 			call stepE					//	E
-
-  0007a	e8 4f 00 00 00	 call	 $stepE$7
-
+; 53   : 			//call stepE					//	E
 ; 54   : 
 ; 55   : 			call stepB					//	B
 
-  0007f	e8 31 00 00 00	 call	 $stepB$8
+  0006b	e8 31 00 00 00	 call	 $stepB$5
 
 ; 56   : 
 ; 57   : 			call stepA					//	A
 
-  00084	e8 0d 00 00 00	 call	 $stepA$9
+  00070	e8 0d 00 00 00	 call	 $stepA$6
 
 ; 58   : 			pop edx						// restore edx
 
-  00089	5a		 pop	 edx
+  00075	5a		 pop	 edx
 
 ; 59   : 
 ; 60   : 			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
 
-  0008a	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
+  00076	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
 
 ; 61   : 			add ebx, 1					// ebx++
 
-  0008d	83 c3 01	 add	 ebx, 1
+  00079	83 c3 01	 add	 ebx, 1
 
 ; 62   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
 
-  00090	3b d9		 cmp	 ebx, ecx
+  0007c	3b d9		 cmp	 ebx, ecx
 
 ; 63   : 			ja lbl_EXIT_END				//
 
-  00092	77 44		 ja	 SHORT $lbl_EXIT_END$10
+  0007e	77 44		 ja	 SHORT $lbl_EXIT_END$7
 
 ; 64   : 			jmp lbl_LOOP				// else loop
 
-  00094	eb d3		 jmp	 SHORT $lbl_LOOP$4
-$stepA$9:
+  00080	eb e2		 jmp	 SHORT $lbl_LOOP$4
+$stepA$6:
 
 ; 65   : 
 ; 66   : stepA:									//									A
 ; 67   : 			push ebp					// Step A - Swap even/odd bits											|	Example:
 
-  00096	55		 push	 ebp
+  00082	55		 push	 ebp
 
 ; 68   : 			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
 
-  00097	8b ec		 mov	 ebp, esp
+  00083	8b ec		 mov	 ebp, esp
 
 ; 69   : 			push eax					// save old eax value													|			
 
-  00099	50		 push	 eax
+  00085	50		 push	 eax
 
-; 70   : 			mov al,byte ptr[ebp-2]		// eax = edx															|	0xAA	=	1010 1010			
+; 70   : 			mov al,byte ptr[ebp+8]		// eax = edx, using 8 b/c we have pushed esp 4 times(edx,ret,ebp,eax)	|	0xAA	=	1010 1010			
 
-  0009a	8a 45 fe	 mov	 al, BYTE PTR [ebp-2]
+  00086	8a 45 08	 mov	 al, BYTE PTR [ebp+8]
 
 ; 71   : 			push ecx					// save old ecx value													|	0x55	=	0101 0101	
 
-  0009d	51		 push	 ecx
+  00089	51		 push	 ecx
 
 ; 72   : 			mov ch,0xAA					// 0xAA has all even bits 1 and odd 0,									|	
 
-  0009e	b5 aa		 mov	 ch, -86			; ffffffaaH
+  0008a	b5 aa		 mov	 ch, -86			; ffffffaaH
 
 ; 73   : 										// bitwise and with this value will result in showing all even bits		|		1010 1001		1010 1001
 ; 74   : 			and ch,al					// ch is now all the even bits of our byte								|	&	1010 1010	&	0101 0101
 
-  000a0	22 e8		 and	 ch, al
+  0008c	22 e8		 and	 ch, al
 
 ; 75   : 			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
 
-  000a2	b1 55		 mov	 cl, 85			; 00000055H
+  0008e	b1 55		 mov	 cl, 85			; 00000055H
 
 ; 76   : 										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
-; 77   : 			and ch,al					// cl is not all the odd bits of our byte								|	
+; 77   : 			and cl,al					// cl is not all the odd bits of our byte								|	
 
-  000a4	22 e8		 and	 ch, al
+  00090	22 c8		 and	 cl, al
 
 ; 78   : 			shr ch,1					// shift all even bits right 1 time										|	>>	1010 1000 	<<	0000 0001
 
-  000a6	d0 ed		 shr	 ch, 1
+  00092	d0 ed		 shr	 ch, 1
 
 ; 79   : 			shl cl,1					// shift all odd bits left 1 time										|	_____________	_____________
 
-  000a8	d0 e1		 shl	 cl, 1
+  00094	d0 e1		 shl	 cl, 1
 
 ; 80   : 			or cl,ch					// combine them back together											|		0101 0100		0000 0010
 
-  000aa	0a cd		 or	 cl, ch
+  00096	0a cd		 or	 cl, ch
 
 ; 81   : 			mov al,cl                   // al is now out byte with even and odd bits swapped					|						
 
-  000ac	8a c1		 mov	 al, cl
+  00098	8a c1		 mov	 al, cl
 
-; 82   : 			mov byte ptr[ebp-2],al		// move result back into edx (stack location)							|		0101 0100
+; 82   : 			mov byte ptr[ebp+8],al		// move result back into edx (stack location)							|		0101 0100
 
-  000ae	88 45 fe	 mov	 BYTE PTR [ebp-2], al
+  0009a	88 45 08	 mov	 BYTE PTR [ebp+8], al
 
 ; 83   : 			pop ecx						// restore ecx															|	|	0000 0010	
 
-  000b1	59		 pop	 ecx
+  0009d	59		 pop	 ecx
 
 ; 84   : 			pop eax						// restore eax															|	_____________
 
-  000b2	58		 pop	 eax
+  0009e	58		 pop	 eax
 
 ; 85   : 			pop ebp						// restore base pointer													|		0101 0110	=	0x5
 
-  000b3	5d		 pop	 ebp
+  0009f	5d		 pop	 ebp
 
 ; 86   : 			ret							// return																|			 0xA9	->  0x56
 
-  000b4	c3		 ret	 0
-$stepB$8:
+  000a0	c3		 ret	 0
+$stepB$5:
 
 ; 87   : 
 ; 88   : stepB:									//									B
-; 89   : 			push ebp					// Step B - Invert middle 4 bits					|	Example:
+; 89   : 			push ebp					// Step B - Invert middle 4 bits			|	Example:
 
-  000b5	55		 push	 ebp
+  000a1	55		 push	 ebp
 
-; 90   : 			mov ebp,esp					// e.g. 0x56 -> 0x6A								|			0x56	=	0101 0110
+; 90   : 			mov ebp,esp					// e.g. 0x56 -> 0x6A						|			0x56	=	0101 0110
 
-  000b6	8b ec		 mov	 ebp, esp
+  000a2	8b ec		 mov	 ebp, esp
 
-; 91   : 			push eax					// save old eax value								|	1 ^ 1 = 0		
+; 91   : 			push eax					// save old eax value						|	1 ^ 1 = 0		
 
-  000b8	50		 push	 eax
+  000a4	50		 push	 eax
 
-; 92   : 			mov al,byte ptr[ebp-2]		// eax = edx										|   1 ^ 0 = 1		XOR'ing any binary value with a 0 will result in no change
+; 92   : 			mov al,byte ptr[ebp+8]		// eax = edx, 8b/c (see stepA)				|   1 ^ 0 = 1		XOR'ing any binary value with a 0 will result in no change
 
-  000b9	8a 45 fe	 mov	 al, BYTE PTR [ebp-2]
+  000a5	8a 45 08	 mov	 al, BYTE PTR [ebp+8]
 
-; 93   : 			xor al,00111100b			// this inverts the middle 4 bits					|	0 ^ 0 = 0		XOR'ing any binary value with a 1 will invert the bit
+; 93   : 			xor al,00111100b			// this inverts the middle 4 bits			|	0 ^ 0 = 0		XOR'ing any binary value with a 1 will invert the bit
 
-  000bc	34 3c		 xor	 al, 60			; 0000003cH
+  000a8	34 3c		 xor	 al, 60			; 0000003cH
 
-; 94   : 			mov byte ptr[ebp-2],al		// move result into edx (on the stack)				|	0 ^ 1 = 1		So, using XOR'ing our byte with 0011 1100 will invert
+; 94   : 			mov byte ptr[ebp+8],al		// move result into edx (on the stack)		|	0 ^ 1 = 1		So, using XOR'ing our byte with 0011 1100 will invert
 
-  000be	88 45 fe	 mov	 BYTE PTR [ebp-2], al
+  000aa	88 45 08	 mov	 BYTE PTR [ebp+8], al
 
-; 95   : 			pop eax						// restore eax										|					the middle 4 bits
+; 95   : 			pop eax						// restore eax								|					the middle 4 bits
 
-  000c1	58		 pop	 eax
+  000ad	58		 pop	 eax
 
-; 96   : 			pop ebp						// restore base pointer								|		0101 0110
+; 96   : 			pop ebp						// restore base pointer						|		0101 0110
 
-  000c2	5d		 pop	 ebp
+  000ae	5d		 pop	 ebp
 
-; 97   : 			ret							// return											|	^	0011 1100
+; 97   : 			ret							// return									|	^	0011 1100
 
-  000c3	c3		 ret	 0
-$stepC$5:
+  000af	c3		 ret	 0
+$stepC$8:
 
-; 98   : 										//													|	_____________
-; 99   : 										//													|		0110 1010	=	0x6A	;	0x56 -> 0x 6A
+; 98   : 										//											|	_____________
+; 99   : 										//											|		0110 1010	=	0x6A	;	0x56 -> 0x 6A
 ; 100  : 
 ; 101  : stepC:
 ; 102  : 			push ebp		// Step C - Swap nibbles
 
-  000c4	55		 push	 ebp
+  000b0	55		 push	 ebp
 
 ; 103  : 			mov ebp,esp		// e.g. 0x6A -> 0xA6
 
-  000c5	8b ec		 mov	 ebp, esp
+  000b1	8b ec		 mov	 ebp, esp
 
 ; 104  : 			// <-math here
 ; 105  : 			pop ebp			//
 
-  000c7	5d		 pop	 ebp
+  000b3	5d		 pop	 ebp
 
 ; 106  : 			ret				//
 
-  000c8	c3		 ret	 0
-$stepD$6:
+  000b4	c3		 ret	 0
+$stepD$9:
 
 ; 107  : 
 ; 108  : stepD:
 ; 109  : 			push ebp		// Step D - Code Table Swap
 
-  000c9	55		 push	 ebp
+  000b5	55		 push	 ebp
 
 ; 110  : 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
 
-  000ca	8b ec		 mov	 ebp, esp
+  000b6	8b ec		 mov	 ebp, esp
 
 ; 111  : 			// <-math here
 ; 112  : 			pop ebp			//
 
-  000cc	5d		 pop	 ebp
+  000b8	5d		 pop	 ebp
 
 ; 113  : 			ret				//
 
-  000cd	c3		 ret	 0
-$stepE$7:
+  000b9	c3		 ret	 0
+$stepE$10:
 
 ; 114  : 
 ; 115  : stepE:
 ; 116  : 			push ebp		// Step E - Reverse Bit Order
 
-  000ce	55		 push	 ebp
+  000ba	55		 push	 ebp
 
 ; 117  : 			mov ebp,esp		// e.g. 0xCA -> 0x53
 
-  000cf	8b ec		 mov	 ebp, esp
+  000bb	8b ec		 mov	 ebp, esp
 
 ; 118  : 			// <-math here
 ; 119  : 			pop ebp			//
 
-  000d1	5d		 pop	 ebp
+  000bd	5d		 pop	 ebp
 
 ; 120  : 			ret				//
 
-  000d2	c3		 ret	 0
+  000be	c3		 ret	 0
 $lbl_EXIT_ZERO_LENGTH$3:
 
 ; 121  : 
@@ -428,47 +416,47 @@ $lbl_EXIT_ZERO_LENGTH$3:
 ; 123  : lbl_EXIT_ZERO_LENGTH :
 ; 124  : 			sub ebx, 1		// decrement ebx to -1 to return failure
 
-  000d3	83 eb 01	 sub	 ebx, 1
+  000bf	83 eb 01	 sub	 ebx, 1
 
 ; 125  : 			jmp lbl_EXIT	//
 
-  000d6	eb 02		 jmp	 SHORT $lbl_EXIT$11
-$lbl_EXIT_END$10:
+  000c2	eb 02		 jmp	 SHORT $lbl_EXIT$11
+$lbl_EXIT_END$7:
 
 ; 126  : 
 ; 127  : lbl_EXIT_END :
-; 128  : 			xor ebx, ebx		// ebx = 0, correctly executed
+; 128  : 			xor ebx, ebx	// ebx = 0, correctly executed
 
-  000d8	33 db		 xor	 ebx, ebx
+  000c4	33 db		 xor	 ebx, ebx
 $lbl_EXIT$11:
 
 ; 129  : 
 ; 130  : lbl_EXIT :
 ; 131  : 			mov resulti, ebx
 
-  000da	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
+  000c6	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
 
 ; 132  : 	}
 ; 133  : 
 ; 134  : 	return resulti;
 
-  000dd	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
+  000c9	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
 
 ; 135  : } // encryptData
 
-  000e0	5f		 pop	 edi
-  000e1	5e		 pop	 esi
-  000e2	5b		 pop	 ebx
-  000e3	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
-  000e6	33 cd		 xor	 ecx, ebp
-  000e8	e8 00 00 00 00	 call	 @__security_check_cookie@4
-  000ed	81 c4 d0 00 00
+  000cc	5f		 pop	 edi
+  000cd	5e		 pop	 esi
+  000ce	5b		 pop	 ebx
+  000cf	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
+  000d2	33 cd		 xor	 ecx, ebp
+  000d4	e8 00 00 00 00	 call	 @__security_check_cookie@4
+  000d9	81 c4 d0 00 00
 	00		 add	 esp, 208		; 000000d0H
-  000f3	3b ec		 cmp	 ebp, esp
-  000f5	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  000fa	8b e5		 mov	 esp, ebp
-  000fc	5d		 pop	 ebp
-  000fd	c3		 ret	 0
+  000df	3b ec		 cmp	 ebp, esp
+  000e1	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  000e6	8b e5		 mov	 esp, ebp
+  000e8	5d		 pop	 ebp
+  000e9	c3		 ret	 0
 ?encryptData@@YAHPADH@Z ENDP				; encryptData
 _TEXT	ENDS
 END
