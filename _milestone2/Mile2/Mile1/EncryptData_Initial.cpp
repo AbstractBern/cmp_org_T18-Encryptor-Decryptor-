@@ -45,7 +45,7 @@ lbl_LOOP :
 			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
 			// mov byte ptr[edi + ebx], dl	moved to end
 
-			push edx					//	
+			push edx					//	push edx so the functions can use it
 			call stepC					//	C
 
 			call stepD					//	D
@@ -55,7 +55,7 @@ lbl_LOOP :
 			call stepB					//	B
 
 			call stepA					//	A
-			add esp, 4					//
+			pop edx						// restore edx
 
 			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
 			add ebx, 1					// ebx++
@@ -63,7 +63,7 @@ lbl_LOOP :
 			ja lbl_EXIT_END				//
 			jmp lbl_LOOP				// else loop
 
-stepA:
+stepA:									//									A
 			push ebp					// Step A - Swap even/odd bits											|	Example:
 			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
 			push eax					// save old eax value													|			
@@ -85,12 +85,18 @@ stepA:
 			pop ebp						// restore base pointer													|		0101 0110	=	0x5
 			ret							// return																|			 0xA9	->  0x56
 
-stepB:
-			push ebp					// Step B - Invert middle 4 bits
-			mov ebp,esp					// e.g. 0x56 -> 0x6A
-										//
-			pop ebp						//
-			ret							//
+stepB:									//									B
+			push ebp					// Step B - Invert middle 4 bits			|	Example:
+			mov ebp,esp					// e.g. 0x56 -> 0x6A						|			0x56	=	0101 0110
+			push eax					// save old eax value						|	1 ^ 1 = 0		
+			mov al,byte ptr[ebp-2]		// eax = edx								|   1 ^ 0 = 1		XOR'ing any binary value with a 0 will result in no change
+			xor al,00111100b			// this inverts the middle 4 bits			|	0 ^ 0 = 0		XOR'ing any binary value with a 1 will invert the bit
+			mov byte ptr[ebp-2],al		// move result into edx (on the stack)		|	0 ^ 1 = 1		So, using XOR'ing our byte with 0011 1100 will invert
+			pop eax						// restore eax								|					the middle 4 bits
+			pop ebp						// restore base pointer						|		0101 0110
+			ret							// return									|	^	0011 1100
+										//											|	_____________
+										//											|		0110 1010	=	0x6A	;	0x56 -> 0x 6A
 
 stepC:
 			push ebp		// Step C - Swap nibbles
