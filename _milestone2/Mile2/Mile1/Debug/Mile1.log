@@ -1,19 +1,12 @@
-﻿  CryptoMain_Initial.cpp
-  DecryptData_Initial.cpp
-  EncryptData_Initial.cpp
-  SHA-256.cpp
-  Generating Code...
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(75): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(77): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(82): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(84): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(89): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(91): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(96): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(98): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(103): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(105): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\cryptomain_initial.cpp(113): warning C4731: 'exCountLetters': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\cryptomain_initial.cpp(122): warning C4731: 'exCountLetters': frame pointer register 'ebp' modified by inline assembly code
-  LINK : C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone2\Mile2\Debug\Mile1.exe not found or not built by the last incremental link; performing full link
+﻿  EncryptData_Initial.cpp
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(68): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(85): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(90): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(92): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(97): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(99): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(104): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(106): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(111): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
+c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone2\mile2\mile1\encryptdata_initial.cpp(113): warning C4731: 'encryptData': frame pointer register 'ebp' modified by inline assembly code
   Mile1.vcxproj -> C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone2\Mile2\Debug\Mile1.exe

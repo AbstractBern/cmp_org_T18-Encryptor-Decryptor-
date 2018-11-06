@@ -42,47 +42,55 @@ mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 		//
 lbl_LOOP :
 			mov dl, byte ptr[edi + ebx]	//
-			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
-			mov byte ptr[edi + ebx], dl	//
+			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
+			// mov byte ptr[edi + ebx], dl	moved to end
 
 			push edx					//	
 			call stepC					//	C
-			add esp, 4					//   
 
-			push edx					//	
 			call stepD					//	D
-			add esp, 4					//	
 
-			push edx					//
 			call stepE					//	E
-			add esp, 4					//
 
-			push edx					//
 			call stepB					//	B
-			add esp, 4					//
 
-			push edx					//
 			call stepA					//	A
 			add esp, 4					//
 
+			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
 			add ebx, 1					// ebx++
 			cmp ebx, ecx				// if(ebx > ecx) end loop
 			ja lbl_EXIT_END				//
 			jmp lbl_LOOP				// else loop
 
 stepA:
-			push ebp		// Step A - Swap even/odd bits
-			mov ebp,esp		// e.g.  0xA9 -> 0x56
-			// <-math here
-			pop ebp			//
-			ret				//
+			push ebp					// Step A - Swap even/odd bits											|	Example:
+			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
+			push eax					// save old eax value													|			
+			mov al,byte ptr[ebp-2]		// eax = edx															|	0xAA	=	1010 1010			
+			push ecx					// save old ecx value													|	0x55	=	0101 0101	
+			mov ch,0xAA					// 0xAA has all even bits 1 and odd 0,									|	
+										// bitwise and with this value will result in showing all even bits		|		1010 1001		1010 1001
+			and ch,al					// ch is now all the even bits of our byte								|	&	1010 1010	&	0101 0101
+			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
+										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
+			and ch,al					// cl is not all the odd bits of our byte								|	
+			shr ch,1					// shift all even bits right 1 time										|	>>	1010 1000 	<<	0000 0001
+			shl cl,1					// shift all odd bits left 1 time										|	_____________	_____________
+			or cl,ch					// combine them back together											|		0101 0100		0000 0010
+			mov al,cl                   // al is now out byte with even and odd bits swapped					|						
+			mov byte ptr[ebp-2],al		// move result back into edx (stack location)							|		0101 0100
+			pop ecx						// restore ecx															|	|	0000 0010	
+			pop eax						// restore eax															|	_____________
+			pop ebp						// restore base pointer													|		0101 0110	=	0x5
+			ret							// return																|			 0xA9	->  0x56
 
 stepB:
-			push ebp		// Step B - Invert middle 4 bits
-			mov ebp,esp		// e.g. 0x56 -> 0x6A
-			// <-math here
-			pop ebp			//
-			ret				//
+			push ebp					// Step B - Invert middle 4 bits
+			mov ebp,esp					// e.g. 0x56 -> 0x6A
+										//
+			pop ebp						//
+			ret							//
 
 stepC:
 			push ebp		// Step C - Swap nibbles

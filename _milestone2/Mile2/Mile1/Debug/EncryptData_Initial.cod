@@ -163,7 +163,7 @@ _dataLength$ = 12					; size = 4
 
 ; 35   : 			jbe lbl_EXIT_ZERO_LENGTH	//
 
-  0005e	76 61		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+  0005e	76 6b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
 
 ; 36   : 
 ; 37   : 			mov edi, data				// put address of first byte of data in edi
@@ -185,243 +185,269 @@ $lbl_LOOP$4:
 
   00069	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
 
-; 45   : 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
+; 45   : 			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
 
   0006c	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
 
-; 46   : 			mov byte ptr[edi + ebx], dl	//
-
-  0006f	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
-
+; 46   : 			// mov byte ptr[edi + ebx], dl	moved to end
 ; 47   : 
 ; 48   : 			push edx					//	
 
-  00072	52		 push	 edx
+  0006f	52		 push	 edx
 
 ; 49   : 			call stepC					//	C
 
-  00073	e8 3a 00 00 00	 call	 $stepC$5
+  00070	e8 47 00 00 00	 call	 $stepC$5
 
-; 50   : 			add esp, 4					//   
+; 50   : 
+; 51   : 			call stepD					//	D
 
-  00078	83 c4 04	 add	 esp, 4
+  00075	e8 47 00 00 00	 call	 $stepD$6
 
-; 51   : 
-; 52   : 			push edx					//	
+; 52   : 
+; 53   : 			call stepE					//	E
 
-  0007b	52		 push	 edx
+  0007a	e8 47 00 00 00	 call	 $stepE$7
 
-; 53   : 			call stepD					//	D
+; 54   : 
+; 55   : 			call stepB					//	B
 
-  0007c	e8 36 00 00 00	 call	 $stepD$6
+  0007f	e8 33 00 00 00	 call	 $stepB$8
 
-; 54   : 			add esp, 4					//	
+; 56   : 
+; 57   : 			call stepA					//	A
 
-  00081	83 c4 04	 add	 esp, 4
-
-; 55   : 
-; 56   : 			push edx					//
-
-  00084	52		 push	 edx
-
-; 57   : 			call stepE					//	E
-
-  00085	e8 32 00 00 00	 call	 $stepE$7
+  00084	e8 0f 00 00 00	 call	 $stepA$9
 
 ; 58   : 			add esp, 4					//
 
-  0008a	83 c4 04	 add	 esp, 4
+  00089	83 c4 04	 add	 esp, 4
 
 ; 59   : 
-; 60   : 			push edx					//
+; 60   : 			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
 
-  0008d	52		 push	 edx
+  0008c	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
 
-; 61   : 			call stepB					//	B
+; 61   : 			add ebx, 1					// ebx++
 
-  0008e	e8 1a 00 00 00	 call	 $stepB$8
+  0008f	83 c3 01	 add	 ebx, 1
 
-; 62   : 			add esp, 4					//
+; 62   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
 
-  00093	83 c4 04	 add	 esp, 4
+  00092	3b d9		 cmp	 ebx, ecx
 
-; 63   : 
-; 64   : 			push edx					//
+; 63   : 			ja lbl_EXIT_END				//
 
-  00096	52		 push	 edx
+  00094	77 3a		 ja	 SHORT $lbl_EXIT_END$10
 
-; 65   : 			call stepA					//	A
+; 64   : 			jmp lbl_LOOP				// else loop
 
-  00097	e8 0c 00 00 00	 call	 $stepA$9
-
-; 66   : 			add esp, 4					//
-
-  0009c	83 c4 04	 add	 esp, 4
-
-; 67   : 
-; 68   : 			add ebx, 1					// ebx++
-
-  0009f	83 c3 01	 add	 ebx, 1
-
-; 69   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
-
-  000a2	3b d9		 cmp	 ebx, ecx
-
-; 70   : 			ja lbl_EXIT_END				//
-
-  000a4	77 20		 ja	 SHORT $lbl_EXIT_END$10
-
-; 71   : 			jmp lbl_LOOP				// else loop
-
-  000a6	eb c1		 jmp	 SHORT $lbl_LOOP$4
+  00096	eb d1		 jmp	 SHORT $lbl_LOOP$4
 $stepA$9:
 
-; 72   : 
-; 73   : stepA:
-; 74   : 			push ebp		// Step A - Swap even/odd bits
+; 65   : 
+; 66   : stepA:
+; 67   : 			push ebp					// Step A - Swap even/odd bits											|	Example:
 
-  000a8	55		 push	 ebp
+  00098	55		 push	 ebp
 
-; 75   : 			mov ebp,esp		// e.g.  0xA9 -> 0x56
+; 68   : 			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
 
-  000a9	8b ec		 mov	 ebp, esp
+  00099	8b ec		 mov	 ebp, esp
 
-; 76   : 			// <-math here
-; 77   : 			pop ebp			//
+; 69   : 			push eax					// save old eax value													|			
 
-  000ab	5d		 pop	 ebp
+  0009b	50		 push	 eax
 
-; 78   : 			ret				//
+; 70   : 			mov al,byte ptr[ebp-2]		// eax = edx															|	0xAA	=	1010 1010			
 
-  000ac	c3		 ret	 0
-$stepB$8:
+  0009c	8a 45 fe	 mov	 al, BYTE PTR [ebp-2]
 
-; 79   : 
-; 80   : stepB:
-; 81   : 			push ebp		// Step B - Invert middle 4 bits
+; 71   : 			push ecx					// save old ecx value													|	0x55	=	0101 0101	
 
-  000ad	55		 push	 ebp
+  0009f	51		 push	 ecx
 
-; 82   : 			mov ebp,esp		// e.g. 0x56 -> 0x6A
+; 72   : 			mov ch,0xAA					// 0xAA has all even bits 1 and odd 0,									|	
 
-  000ae	8b ec		 mov	 ebp, esp
+  000a0	b5 aa		 mov	 ch, -86			; ffffffaaH
 
-; 83   : 			// <-math here
-; 84   : 			pop ebp			//
+; 73   : 										// bitwise and with this value will result in showing all even bits		|		1010 1001		1010 1001
+; 74   : 			and ch,al					// ch is now all the even bits of our byte								|	&	1010 1010	&	0101 0101
 
-  000b0	5d		 pop	 ebp
+  000a2	22 e8		 and	 ch, al
 
-; 85   : 			ret				//
+; 75   : 			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
 
-  000b1	c3		 ret	 0
-$stepC$5:
+  000a4	b1 55		 mov	 cl, 85			; 00000055H
 
-; 86   : 
-; 87   : stepC:
-; 88   : 			push ebp		// Step C - Swap nibbles
+; 76   : 										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
+; 77   : 			and ch,al					// cl is not all the odd bits of our byte								|	
 
-  000b2	55		 push	 ebp
+  000a6	22 e8		 and	 ch, al
 
-; 89   : 			mov ebp,esp		// e.g. 0x6A -> 0xA6
+; 78   : 			shr ch,1					// shift all even bits right 1 time										|	>>	1010 1000 	<<	0000 0001
 
-  000b3	8b ec		 mov	 ebp, esp
+  000a8	d0 ed		 shr	 ch, 1
 
-; 90   : 			// <-math here
-; 91   : 			pop ebp			//
+; 79   : 			shl cl,1					// shift all odd bits left 1 time										|	_____________	_____________
+
+  000aa	d0 e1		 shl	 cl, 1
+
+; 80   : 			or cl,ch					// combine them back together											|		0101 0100		0000 0010
+
+  000ac	0a cd		 or	 cl, ch
+
+; 81   : 			mov al,cl                   // al is now out byte with even and odd bits swapped					|						
+
+  000ae	8a c1		 mov	 al, cl
+
+; 82   : 			mov byte ptr[ebp-2],al		// move result back into edx (stack location)							|		0101 0100
+
+  000b0	88 45 fe	 mov	 BYTE PTR [ebp-2], al
+
+; 83   : 			pop ecx						// restore ecx															|	|	0000 0010	
+
+  000b3	59		 pop	 ecx
+
+; 84   : 			pop eax						// restore eax															|	_____________
+
+  000b4	58		 pop	 eax
+
+; 85   : 			pop ebp						// restore base pointer													|		0101 0110	=	0x5
 
   000b5	5d		 pop	 ebp
 
-; 92   : 			ret				//
+; 86   : 			ret							// return																|			 0xA9	->  0x56
 
   000b6	c3		 ret	 0
-$stepD$6:
+$stepB$8:
 
-; 93   : 
-; 94   : stepD:
-; 95   : 			push ebp		// Step D - Code Table Swap
+; 87   : 
+; 88   : stepB:
+; 89   : 			push ebp					// Step B - Invert middle 4 bits
 
   000b7	55		 push	 ebp
 
-; 96   : 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
+; 90   : 			mov ebp,esp					// e.g. 0x56 -> 0x6A
 
   000b8	8b ec		 mov	 ebp, esp
 
-; 97   : 			// <-math here
-; 98   : 			pop ebp			//
+; 91   : 										//
+; 92   : 			pop ebp						//
 
   000ba	5d		 pop	 ebp
 
-; 99   : 			ret				//
+; 93   : 			ret							//
 
   000bb	c3		 ret	 0
-$stepE$7:
+$stepC$5:
 
-; 100  : 
-; 101  : stepE:
-; 102  : 			push ebp		// Step E - Reverse Bit Order
+; 94   : 
+; 95   : stepC:
+; 96   : 			push ebp		// Step C - Swap nibbles
 
   000bc	55		 push	 ebp
 
-; 103  : 			mov ebp,esp		// e.g. 0xCA -> 0x53
+; 97   : 			mov ebp,esp		// e.g. 0x6A -> 0xA6
 
   000bd	8b ec		 mov	 ebp, esp
 
-; 104  : 			// <-math here
-; 105  : 			pop ebp			//
+; 98   : 			// <-math here
+; 99   : 			pop ebp			//
 
   000bf	5d		 pop	 ebp
 
-; 106  : 			ret				//
+; 100  : 			ret				//
 
   000c0	c3		 ret	 0
+$stepD$6:
+
+; 101  : 
+; 102  : stepD:
+; 103  : 			push ebp		// Step D - Code Table Swap
+
+  000c1	55		 push	 ebp
+
+; 104  : 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
+
+  000c2	8b ec		 mov	 ebp, esp
+
+; 105  : 			// <-math here
+; 106  : 			pop ebp			//
+
+  000c4	5d		 pop	 ebp
+
+; 107  : 			ret				//
+
+  000c5	c3		 ret	 0
+$stepE$7:
+
+; 108  : 
+; 109  : stepE:
+; 110  : 			push ebp		// Step E - Reverse Bit Order
+
+  000c6	55		 push	 ebp
+
+; 111  : 			mov ebp,esp		// e.g. 0xCA -> 0x53
+
+  000c7	8b ec		 mov	 ebp, esp
+
+; 112  : 			// <-math here
+; 113  : 			pop ebp			//
+
+  000c9	5d		 pop	 ebp
+
+; 114  : 			ret				//
+
+  000ca	c3		 ret	 0
 $lbl_EXIT_ZERO_LENGTH$3:
 
-; 107  : 
-; 108  : 
-; 109  : lbl_EXIT_ZERO_LENGTH :
-; 110  : 			sub ebx, 1		// decrement ebx to -1 to return failure
+; 115  : 
+; 116  : 
+; 117  : lbl_EXIT_ZERO_LENGTH :
+; 118  : 			sub ebx, 1		// decrement ebx to -1 to return failure
 
-  000c1	83 eb 01	 sub	 ebx, 1
+  000cb	83 eb 01	 sub	 ebx, 1
 
-; 111  : 			jmp lbl_EXIT	//
+; 119  : 			jmp lbl_EXIT	//
 
-  000c4	eb 02		 jmp	 SHORT $lbl_EXIT$11
+  000ce	eb 02		 jmp	 SHORT $lbl_EXIT$11
 $lbl_EXIT_END$10:
 
-; 112  : 
-; 113  : lbl_EXIT_END :
-; 114  : 			xor ebx, ebx		// ebx = 0, correctly executed
+; 120  : 
+; 121  : lbl_EXIT_END :
+; 122  : 			xor ebx, ebx		// ebx = 0, correctly executed
 
-  000c6	33 db		 xor	 ebx, ebx
+  000d0	33 db		 xor	 ebx, ebx
 $lbl_EXIT$11:
 
-; 115  : 
-; 116  : lbl_EXIT :
-; 117  : 			mov resulti, ebx
+; 123  : 
+; 124  : lbl_EXIT :
+; 125  : 			mov resulti, ebx
 
-  000c8	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
+  000d2	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
 
-; 118  : 	}
-; 119  : 
-; 120  : 	return resulti;
+; 126  : 	}
+; 127  : 
+; 128  : 	return resulti;
 
-  000cb	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
+  000d5	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
 
-; 121  : } // encryptData
+; 129  : } // encryptData
 
-  000ce	5f		 pop	 edi
-  000cf	5e		 pop	 esi
-  000d0	5b		 pop	 ebx
-  000d1	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
-  000d4	33 cd		 xor	 ecx, ebp
-  000d6	e8 00 00 00 00	 call	 @__security_check_cookie@4
-  000db	81 c4 d0 00 00
+  000d8	5f		 pop	 edi
+  000d9	5e		 pop	 esi
+  000da	5b		 pop	 ebx
+  000db	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
+  000de	33 cd		 xor	 ecx, ebp
+  000e0	e8 00 00 00 00	 call	 @__security_check_cookie@4
+  000e5	81 c4 d0 00 00
 	00		 add	 esp, 208		; 000000d0H
-  000e1	3b ec		 cmp	 ebp, esp
-  000e3	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  000e8	8b e5		 mov	 esp, ebp
-  000ea	5d		 pop	 ebp
-  000eb	c3		 ret	 0
+  000eb	3b ec		 cmp	 ebp, esp
+  000ed	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  000f2	8b e5		 mov	 esp, ebp
+  000f4	5d		 pop	 ebp
+  000f5	c3		 ret	 0
 ?encryptData@@YAHPADH@Z ENDP				; encryptData
 _TEXT	ENDS
 END
