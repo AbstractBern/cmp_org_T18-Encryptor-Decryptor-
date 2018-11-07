@@ -122,10 +122,18 @@ stepD:
 stepE:
 			push ebp		// Step E - Reverse Bit Order
 			mov ebp,esp		// e.g. 0xCA -> 0x53
+			push edx
 			mov al, byte ptr[ebp+8]	//not too sure on this step
-			BSR al, al//? reverse bit operator 
+			XOR bx, bx        // Set bx to zero
+       			mov cx, 16
+		RLOOP:
+       			rcr ax, 1		//    AX,1
+       			rcl bx, 1		//    BX,1
+       			LOOP   RLOOP        // Do 16 times
+			//BSR al, al//? reverse bit operator 
 			// <-math here
 			pop ebp			//
+			pop edx
 			ret				//
 
 
