@@ -112,13 +112,18 @@ stepC:
 stepD:
 			push ebp		// Step D - Code Table Swap				
 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]			
-			// <-math here		
-			pop ebp			//
-			ret				//
+			push eax			//push eax reg
+			mov al, byte ptr[ebp+8]		//move byte into register
+			BSWAP al, gEncodeTable[al]	//swaps the bytes - has not been tested
+			pop eax				//remoe eax
+			pop ebp			//remove ebp
+			ret			//return 
 
 stepE:
 			push ebp		// Step E - Reverse Bit Order
 			mov ebp,esp		// e.g. 0xCA -> 0x53
+			mov al, byte ptr[ebp+8]	//not too sure on this step
+			BSR al, al//? reverse bit operator 
 			// <-math here
 			pop ebp			//
 			ret				//
