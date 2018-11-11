@@ -112,9 +112,9 @@ stepC:
 stepD:
 			push ebp		// Step D - Code Table Swap				
 			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]			
-			push eax			//push eax reg
-			mov al, byte ptr[ebp+8]		//move byte into register
-			BSWAP al, gEncodeTable[al]	//swaps the bytes - has not been tested
+			//push eax			//push eax reg
+			//mov al, byte ptr[ebp+8]		//move byte into register
+			lea eax, gEncodeTable[]	//swaps the bytes - has not been tested
 			pop eax				//remoe eax
 			pop ebp			//remove ebp
 			ret			//return 
