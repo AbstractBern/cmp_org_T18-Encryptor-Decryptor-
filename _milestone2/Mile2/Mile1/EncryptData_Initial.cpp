@@ -116,6 +116,42 @@ stepD:
 			pop ebp			//remove esi
 			ret			//return 
 
+			/*		Using Registers in a Function
+			Every Time we use a register in a method we want to save the value before we change it
+			This is done by pushing the register onto the new stack frame we set up
+
+			So, if we want to use the eax register, we first push the value.
+						push eax
+			then, we can use the register to do whatever we want
+						mov al,byte ptr[ebp+8]
+			after we finish using the register we restore it from the stack frame
+						pop eax
+
+			Keep in mind that if you want to use multiple registers you will need to push all the values and pop them in the reverse order
+						push eax
+						push ebx
+						push ecx
+						pop ecx
+						pop ebx
+						pop eax
+			*/
+
+			/*		Using arrays in Assembly
+			Lets say you want to use the gEncodeTable unsigned char array. It is a global variable, so we can use its name to reference it in VisualStudio
+			We have to use the load effective address (lea) command because we want the address of the variable not the first value of the array.
+						lea esi,gEncodeTable
+			This puts the address of the first value in the array into the esi register. So effectively, the value at the address stored in esi is the first value in the array
+						[esi] = gEncodeTable[0]
+			So if we want to access a value further along in the array we can simply us relative addresses.
+						[esi+1] = gEncodeTable[1]
+						[esi+200]  = gEncodeTable[200]
+			However, there is a slight problem we must correct for:
+			Since arrays indexes start at 0 if we try to use [esi+256], we are trying the get gEncodeTable[256], which is out of bounds.
+			To correct for this we need to subtract 1 from the address that we are trying to access. 
+						[esi+0xFF] // ERROR: there is no 257th value, out of bounds.
+						[esi+0xFE] // CORRECT: this is the 256th value in the array.
+			*/
+
 stepE:
 			push ebp		// Step E - Reverse Bit Order
 			mov ebp,esp		// e.g. 0xCA -> 0x53
