@@ -111,10 +111,7 @@ stepC:
 
 stepD:
 			push ebp		// Step D - Code Table Swap				
-			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]			
-			push eax
-			xor eax, eax
-			mov eax, 
+			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]		
 			lea esi, gEncodeTable[esi]
 			pop ebp			//remove esi
 			ret			//return 
