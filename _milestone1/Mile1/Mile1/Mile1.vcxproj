@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="1_testASCII.txt" />
+    <Text Include="ATest.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{242E59AC-7C30-43AB-95EF-DDDB16D7756D}</ProjectGuid>

@@ -128,9 +128,9 @@ _dataLength$ = 12					; size = 4
 
   00045	8a 06		 mov	 al, BYTE PTR [esi]
 
-; 26   : 			mov bl, 256					//
+; 26   : 			mov bl, 0xFF					//
 
-  00047	b3 00		 mov	 bl, 0
+  00047	b3 ff		 mov	 bl, -1
 
 ; 27   : 			mul bl						// multiply al by 256
 

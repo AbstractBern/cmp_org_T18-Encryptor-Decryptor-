@@ -53,5 +53,8 @@
     <Text Include="1_testASCII.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="ATest.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

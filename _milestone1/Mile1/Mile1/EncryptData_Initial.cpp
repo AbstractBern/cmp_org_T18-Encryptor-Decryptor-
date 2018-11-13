@@ -23,7 +23,7 @@ int encryptData(char *data, int dataLength)
 			mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 			xor eax, eax				//
 			mov al, byte ptr[esi]		// store gPassword[0] in al
-			mov bl, 256					//
+			mov bl, 0xFF					//
 			mul bl						// multiply al by 256
 			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
 			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]

@@ -1,9 +1,2 @@
-﻿  CryptoMain_Initial.cpp
-  DecryptData_Initial.cpp
-  EncryptData_Initial.cpp
-  SHA-256.cpp
-  Generating Code...
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone1\mile1\mile1\cryptomain_initial.cpp(113): warning C4731: 'exCountLetters': frame pointer register 'ebp' modified by inline assembly code
-c:\users\caleb\onedrive - university of texas at san antonio\workspace\git\cmp_org_t18-encryptor-decryptor-\_milestone1\mile1\mile1\cryptomain_initial.cpp(122): warning C4731: 'exCountLetters': frame pointer register 'ebp' modified by inline assembly code
-  LINK : C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone1\Mile1\Debug\Mile1.exe not found or not built by the last incremental link; performing full link
+﻿  EncryptData_Initial.cpp
   Mile1.vcxproj -> C:\Users\caleb\OneDrive - University of Texas at San Antonio\Workspace\git\cmp_org_T18-Encryptor-Decryptor-\_milestone1\Mile1\Debug\Mile1.exe
