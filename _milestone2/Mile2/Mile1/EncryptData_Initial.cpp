@@ -159,19 +159,16 @@ stepD:
 stepE:
 			push ebp		// Step E - Reverse Bit Order
 			mov ebp,esp		// e.g. 0xCA -> 0x53
-			push edx
+				
 			mov al, byte ptr[ebp+8]	//not too sure on this step
-			XOR bx, bx        // Set bx to zero
-       			mov cx, 16
-		RLOOP:
-       			rcr ax, 1		//    AX,1
-       			rcl bx, 1		//    BX,1
-       			LOOP   RLOOP        // Do 16 times
-			//BSR al, al//? reverse bit operator 
-			// <-math here
-			pop edx	//
-			pop ebp
-			ret				//
+			cmp ecx, 8		//compares if exc counter is not 8 for shifting purposes
+			jne REPEAT	//jumps to repeat
+			mov al, dl	//replace old bits with reverse order  xcA
+			ret
+		REPEAT:				//lloop	
+			ror dl, 1		//rotates first bit to the end
+			sar dl, 1		//shifts everything but the last bit to the right
+			inc ecx
 
 
 lbl_EXIT_ZERO_LENGTH :
