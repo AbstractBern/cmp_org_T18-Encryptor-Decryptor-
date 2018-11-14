@@ -169,8 +169,8 @@ stepE:
        			LOOP   RLOOP        // Do 16 times
 			//BSR al, al//? reverse bit operator 
 			// <-math here
-			pop ebp			//
-			pop edx
+			pop edx	//
+			pop ebp
 			ret				//
 
 
