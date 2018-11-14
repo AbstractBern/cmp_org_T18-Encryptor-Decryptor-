@@ -159,17 +159,19 @@ stepD:
 stepE:
 			push ebp		// Step E - Reverse Bit Order
 			mov ebp,esp		// e.g. 0xCA -> 0x53
-				
-			mov al, byte ptr[ebp+8]	//not too sure on this step
-			cmp ecx, 8		//compares if exc counter is not 8 for shifting purposes
-			jne REPEAT	//jumps to repeat
-			mov al, dl	//replace old bits with reverse order  xcA
-			ret
-		REPEAT:				//lloop	
-			ror dl, 1		//rotates first bit to the end
-			sar dl, 1		//shifts everything but the last bit to the right
-			inc ecx
-
+			push eax		//push register onto stack
+			push edx
+			mov al, byte ptr[ebp+8]
+			push ecx, [al-1]
+			mov dl, al
+			cmp ecx, 0
+			jg REPEAT
+			mov al, dl
+			move byte ptr[ebp+8], al
+			return
+		REPEAT:
+			ror byte ptr[al+ecx], 2
+			dec ecx
 
 lbl_EXIT_ZERO_LENGTH :
 			sub ebx, 1		// decrement ebx to -1 to return failure
