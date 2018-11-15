@@ -111,13 +111,14 @@ stepC:
 
 stepD:
 			push ebp		// Step D - Code Table Swap				
-			mov ebp,esp		// e.g. 0xA6 -> CodeTable[0xA6]
-			push eax
-			mov al, byte ptr[ebp+8]
-			lea esi, gEncodeTable[esi-1]
-			mov byte ptr[ebp+8], esi
-			pop eax
-			pop ebp			//remove esi
+			mov ebp,esp		//move stack pointer into base pointer e.g. 0xA6 -> CodeTable[0xA6]
+			push eax		//push eax register for use
+			mov al, byte ptr[ebp+8]	//move data byte located at [ebp+8] into al
+			lea esi, gEncodeTable[al]	//swaap al with al byte located and passed in by gEncodeTable[al]
+			mov al, esi			//mov result of swapped bytes back into al
+			mov byte ptr[ebp+8], esi	//move swapped byte back into [ebp+8] on the stack
+			pop eax				//pop eax
+			pop ebp			//pop ebp
 			ret			//return 
 
 			/*		Using Registers in a Function
@@ -158,20 +159,25 @@ stepD:
 
 stepE:
 			push ebp		// Step E - Reverse Bit Order
-			mov ebp,esp		// e.g. 0xCA -> 0x53
+			mov ebp,esp		// move stack pointer to base pointer e.g. 0xCA -> 0x53
 			push eax		//push register onto stack
-			push edx
-			mov al, byte ptr[ebp+8]
-			push ecx, [al-1]
-			mov dl, al
-			cmp ecx, 0
-			jg REPEAT
-			mov al, dl
-			move byte ptr[ebp+8], al
-			return
-		REPEAT:
-			ror byte ptr[al+ecx], 2
-			dec ecx
+			push edx		//push edx register for use
+			push ecx		//push ecx register to use
+			mov ecx, 8		//move the number 8 to the counter ecx register
+			mov al, byte ptr[ebp+8]	//move byte of data located at [ebp+8] into al 
+			cmp ecx, 0		//compare if ecx (eight) to 0
+			jg REPEAT		//jump to header if ecx is greater than 0
+			mov al, dl		//after jump is done, move data in dl back into al
+			move byte ptr[ebp+8], al	//move al to the byte locate at [ebp+8]
+			pop ecx			//push (ecx) registers in opposite order
+			pop edx			//pop edx
+			pop eax			//pop eax
+			pop ebp			//pop ebp
+			ret			//return 
+		REPEAT:					//REPEAT LOOP should loop 8 times
+			shr al, 1			//shifts right the data in al and is given a carryflag
+			rcl dl, 1			//carry flag is carried left of dl by one
+			dec ecx, 1			//ecx is decremented by one 
 
 lbl_EXIT_ZERO_LENGTH :
 			sub ebx, 1		// decrement ebx to -1 to return failure
