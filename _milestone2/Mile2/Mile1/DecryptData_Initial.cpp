@@ -46,15 +46,15 @@ lbl_LOOP :
 			// mov byte ptr[edi + ebx], dl	moved to end
 
 			push edx					//	push edx so the functions can use it
-			call stepC					//	C
+			call stepA					//	C
 
-			//call stepD					//	D
+			call stepB					//	D
 
-			//call stepE					//	E
+			call stepE					//	E
 
-			call stepB					//	B
+			call stepD					//	B
 
-			call stepA					//	A
+			call stepC					//	A
 			pop edx						// restore edx
 
 			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
