@@ -48,9 +48,9 @@ lbl_LOOP :
 			push edx					//	push edx so the functions can use it
 			call stepC					//	C
 
-			//call stepD					//	D
+			call stepD					//	D
 
-			//call stepE					//	E
+			call stepE					//	E
 
 			call stepB					//	B
 
