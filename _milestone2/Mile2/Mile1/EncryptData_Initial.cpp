@@ -20,15 +20,17 @@ int encryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
-mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
+			mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 			xor eax, eax				//
 			mov al, byte ptr[esi]		// store gPassword[0] in al
-			mov bl, 256					//
-			mul bl						// multiply al by 256
-			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
-										// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+			shl ax,8					// shift left 8 times equivalent to multiplying by 256
+			xor ecx,ecx					// set ecx to 0
+			mov cl, byte ptr[esi + 1]	// set cx to gPassword[1]
+			add ax, cx					// add gPassword[1] to ax, ax is now starting index for keyfile
+										// ax = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 
 			xor ebx, ebx				// ebx = control variable (loop)
+			xor ecx,ecx
 			mov ecx, dataLength			// ecx = length
 			cmp ecx, 0					// check that length is not <= 0
 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
@@ -43,7 +45,6 @@ mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 lbl_LOOP :
 			mov dl, byte ptr[edi + ebx]	//
 			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
-			// mov byte ptr[edi + ebx], dl	moved to end
 
 			push edx					//	push edx so the functions can use it
 			call stepC					//	C
@@ -110,74 +111,49 @@ stepC:
 			ret							// return							|			
 
 stepD:
-			push ebp		// Step D - Code Table Swap				
-			mov ebp,esp		//move stack pointer into base pointer e.g. 0xA6 -> CodeTable[0xA6]
-			push eax		//push eax register for use
-			mov al, byte ptr[ebp+8]	//move data byte located at [ebp+8] into al
-			lea esi, gEncodeTable[al]	//swaap al with al byte located and passed in by gEncodeTable[al]
-			mov al, esi			//mov result of swapped bytes back into al
-			mov byte ptr[ebp+8], esi	//move swapped byte back into [ebp+8] on the stack
-			pop eax				//pop eax
-			pop ebp			//pop ebp
-			ret			//return 
-
-			/*		Using Registers in a Function
-			Every Time we use a register in a method we want to save the value before we change it
-			This is done by pushing the register onto the new stack frame we set up
-
-			So, if we want to use the eax register, we first push the value.
-						push eax
-			then, we can use the register to do whatever we want
-						mov al,byte ptr[ebp+8]
-			after we finish using the register we restore it from the stack frame
-						pop eax
-
-			Keep in mind that if you want to use multiple registers you will need to push all the values and pop them in the reverse order
-						push eax
-						push ebx
-						push ecx
-						pop ecx
-						pop ebx
-						pop eax
-			*/
-
-			/*		Using arrays in Assembly
-			Lets say you want to use the gEncodeTable unsigned char array. It is a global variable, so we can use its name to reference it in VisualStudio
-			We have to use the load effective address (lea) command because we want the address of the variable not the first value of the array.
-						lea esi,gEncodeTable
-			This puts the address of the first value in the array into the esi register. So effectively, the value at the address stored in esi is the first value in the array
-						[esi] = gEncodeTable[0]
-			So if we want to access a value further along in the array we can simply us relative addresses.
-						[esi+1] = gEncodeTable[1]
-						[esi+200]  = gEncodeTable[200]
-			However, there is a slight problem we must correct for:
-			Since arrays indexes start at 0 if we try to use [esi+256], we are trying the get gEncodeTable[256], which is out of bounds.
-			To correct for this we need to subtract 1 from the address that we are trying to access. 
-						[esi+0xFF] // ERROR: there is no 257th value, out of bounds.
-						[esi+0xFE] // CORRECT: this is the 256th value in the array.
-			*/
+			push ebp					// Step D - Code Table Swap				
+			mov ebp,esp					// e.g. 0xA6 -> CodeTable[0xA6]
+			push eax					// push eax register for use
+			push esi					// save old esi value
+			push ebx					// save old ebx value
+			xor eax,eax					// make sure eax is 0
+			xor ebx,ebx					// set ebx to 0
+			mov al, byte ptr[ebp+8]		// get the parameter from stack
+			lea esi, gEncodeTable		// put the address of the first byte of gEncodeTable into esi
+			mov bl, byte ptr[esi+eax]	// copy the value at the index al from gEncodeTable (gEncodeTable[al])
+			mov byte ptr[ebp+8], bl		// copy new value back into the parameter
+			pop ebx						// restore ebx
+			pop esi						// restore esi
+			pop eax						// restore eax
+			pop ebp						// restore base pointer
+			ret							// return
 
 stepE:
-			push ebp		// Step E - Reverse Bit Order
-			mov ebp,esp		// move stack pointer to base pointer e.g. 0xCA -> 0x53
-			push eax		//push register onto stack
-			push edx		//push edx register for use
-			push ecx		//push ecx register to use
-			mov ecx, 8		//move the number 8 to the counter ecx register
-			mov al, byte ptr[ebp+8]	//move byte of data located at [ebp+8] into al 
-			cmp ecx, 0		//compare if ecx (eight) to 0
-			jg REPEAT		//jump to header if ecx is greater than 0
-			mov al, dl		//after jump is done, move data in dl back into al
-			move byte ptr[ebp+8], al	//move al to the byte locate at [ebp+8]
-			pop ecx			//push (ecx) registers in opposite order
-			pop edx			//pop edx
-			pop eax			//pop eax
-			pop ebp			//pop ebp
-			ret			//return 
-		REPEAT:					//REPEAT LOOP should loop 8 times
-			shr al, 1			//shifts right the data in al and is given a carryflag
-			rcl dl, 1			//carry flag is carried left of dl by one
-			dec ecx, 1			//ecx is decremented by one 
+			push ebp					// Step E - Reverse Bit Order
+			mov ebp,esp					// e.g. 0xCa -> 0x53
+			push eax					// save old eax value
+			push ebx					// save old ebx value
+			push ecx					// save old ecx value
+			mov al, byte ptr[ebp+8]		// get the parameter from stack
+			xor ebx,ebx					// set ebx to 0, will be our counter
+			xor ecx,ecx					// set ecx to 0, will be the new reversed value
+			jmp lbl_ELOOP				// start looping
+			
+	lbl_ELOOP:
+			shl al,1					// shift the right most bit into the carry
+			rcr cl,1					// rotate the carry into cl
+			cmp ebx,7					// compare counter to 7
+			je lbl_EEND					// if counter is 7 end the loop
+			inc ebx						// else increment count
+			jmp lbl_ELOOP				// and keep looping
+
+	lbl_EEND:
+			mov byte ptr[ebp+8],cl		// move result into parameter
+			pop ecx						// restore ecx
+			pop ebx						// restore ebx
+			pop eax						// restore eax
+			pop ebp						// restore base pointer
+			ret							// return
 
 lbl_EXIT_ZERO_LENGTH :
 			sub ebx, 1		// decrement ebx to -1 to return failure

@@ -20,15 +20,19 @@ int decryptData(char *data, int dataLength)
 	// Also, you cannot use a lot of global variables - work with registers
 
 	__asm {
+
+		//	Inverse of Encrypt, A->B->E->D->C->XOR
 			mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 			xor eax, eax				//
 			mov al, byte ptr[esi]		// store gPassword[0] in al
-			mov bl, 256					//
-			mul bl						// multiply al by 256
-			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
-										// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+			shl ax,8					// shift left 8 times equivalent to multiplying by 256
+			xor ecx,ecx					// set ecx to 0
+			mov cl, byte ptr[esi + 1]	// set cx to gPassword[1]
+			add ax, cx					// add gPassword[1] to ax, ax is now starting index for keyfile
+										// ax = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 
 			xor ebx, ebx				// ebx = control variable (loop)
+			xor ecx,ecx
 			mov ecx, dataLength			// ecx = length
 			cmp ecx, 0					// check that length is not <= 0
 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
@@ -41,21 +45,21 @@ int decryptData(char *data, int dataLength)
 		// LOOP THROUGH ENTIRE data[] BYTE BY BYTE
 		//
 lbl_LOOP :
-			mov dl, byte ptr[edi + ebx]	//
-			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
-			// mov byte ptr[edi + ebx], dl	moved to end
+			mov dl, byte ptr[edi + ebx]	// get data[ebx]
 
 			push edx					//	push edx so the functions can use it
-			call stepA					//	C
+			call stepA					//	A
 
-			call stepB					//	D
+			call stepB					//	B
 
 			call stepE					//	E
 
-			call stepD					//	B
+			call stepD					//	D
 
-			call stepC					//	A
+			call stepC					//	C
 			pop edx						// restore edx
+
+			xor dl, byte ptr[esi + eax]	// edx = data[ebx] ^ keyfile[starting_index]
 
 			mov byte ptr[edi + ebx], dl	// data[ebx] = edx
 			add ebx, 1					// ebx++
@@ -64,7 +68,7 @@ lbl_LOOP :
 			jmp lbl_LOOP				// else loop
 
 stepA:									//									A
-			push ebp					// Step A - Swap even/odd bits											|	Example:// EncryptData.cpp
+			push ebp					// Step A - Swap even/odd bits											|	Example:
 			mov ebp,esp					// e.g.  0xA9 -> 0x56													|			0xA9	=	1010 1001
 			push eax					// save old eax value													|			
 			mov al,byte ptr[ebp+8]		// eax = edx, using 8 b/c we have pushed esp 4 times(edx,ret,ebp,eax)	|	0xAA	=	1010 1010			
@@ -72,20 +76,6 @@ stepA:									//									A
 			mov ch,0xAA					// 0xAA has all even bits 1 and odd 0,									|	
 										// bitwise and with this value will result in showing all even bits		|		1010 1001		1010 1001
 			and ch,al					// ch is now all the even bits of our byte								|	&	1010 1010	&	0101 0101
-			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
-										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
-			and cl,al					// cl is not all the odd bits of our byte								|	
-			shr ch,1					// shift all even bits right 1 time										|	>>	1010 1000 	<<	0000 0001
-			shl cl,1					// shift all odd bits left 1 time										|	_____________	_____________
-			or cl,ch					// combine them back together											|		0101 0100		0000 0010
-			mov al,cl                   // al is now out byte with even and odd bits swapped					|						
-			mov byte ptr[ebp+8],al		// move result back into edx (stack location)							|		0101 0100
-			pop ecx						// restore ecx															|	|	0000 0010	
-			pop eax						// restore eax															|	_____________
-			pop ebp						// restore base pointer													|		0101 0110	=	0x5
-			ret							// return																|			 0xA9	->  0x56
-
-stepB:
 			mov cl,0x55					// 0x55 has all even bits 0 and odd 1,									|	_____________	_____________
 										// bitwise and with this value will result in showing all odd bits		|		1010 1000		0000 0001
 			and cl,al					// cl is not all the odd bits of our byte								|	
@@ -124,37 +114,49 @@ stepC:
 			ret							// return							|			
 
 stepD:
-			push ebp		// Step D - Code Table Swap				
-			mov ebp,esp		//move stack pointer into base pointer e.g. 0xA6 -> CodeTable[0xA6]
-			push eax		//push eax register for use
-			mov al, byte ptr[ebp+8]	//move data byte located at [ebp+8] into al
-			lea esi, gEncodeTable[al]	//swaap al with al byte located and passed in by gEncodeTable[al]
-			mov al, esi			//mov result of swapped bytes back into al
-			mov byte ptr[ebp+8], esi	//move swapped byte back into [ebp+8] on the stack
-			pop eax				//pop eax
-			pop ebp			//pop ebp
-			ret			//return
+			push ebp					// Step D - Code Table Swap				
+			mov ebp,esp					// e.g. 0xA6 -> CodeTable[0xA6]
+			push eax					// push eax register for use
+			push esi					// save old esi value
+			push ebx					// save old ebx value
+			xor eax,eax					// make sure eax is 0
+			xor ebx,ebx					// set ebx to 0
+			mov al, byte ptr[ebp+8]		// get the parameter from stack
+			lea esi, gDecodeTable		// put the address of the first byte of gEncodeTable into esi
+			mov bl, byte ptr[esi+eax]	// copy the value at the index al from gEncodeTable (gEncodeTable[al])
+			mov byte ptr[ebp+8], bl		// copy new value back into the parameter
+			pop ebx						// restore ebx
+			pop esi						// restore esi
+			pop eax						// restore eax
+			pop ebp						// restore base pointer
+			ret							// return
+
 stepE:
-			push ebp		// Step E - Reverse Bit Order
-			mov ebp,esp		// move stack pointer to base pointer e.g. 0xCA -> 0x53
-			push eax		//push register onto stack
-			push edx		//push edx register for use
-			push ecx		//push ecx register to use
-			mov ecx, 8		//move the number 8 to the counter ecx register
-			mov al, byte ptr[ebp+8]	//move byte of data located at [ebp+8] into al 
-			cmp ecx, 0		//compare if ecx (eight) to 0
-			jg REPEAT		//jump to header if ecx is greater than 0
-			mov al, dl		//after jump is done, move data in dl back into al
-			move byte ptr[ebp+8], al	//move al to the byte locate at [ebp+8]
-			pop ecx			//push (ecx) registers in opposite order
-			pop edx			//pop edx
-			pop eax			//pop eax
-			pop ebp			//pop ebp
-			ret			//return 
-		REPEAT:					//REPEAT LOOP should loop 8 times
-			shr al, 1			//shifts right the data in al and is given a carryflag
-			rcl dl, 1			//carry flag is carried left of dl by one
-			dec ecx, 1			//ecx is decremented by one 
+			push ebp					// Step E - Reverse Bit Order
+			mov ebp,esp					// e.g. 0xCa -> 0x53
+			push eax					// save old eax value
+			push ebx					// save old ebx value
+			push ecx					// save old ecx value
+			mov al, byte ptr[ebp+8]		// get the parameter from stack
+			xor ebx,ebx					// set ebx to 0, will be our counter
+			xor ecx,ecx					// set ecx to 0, will be the new reversed value
+			jmp lbl_ELOOP				// start looping
+			
+	lbl_ELOOP:
+			shl al,1					// shift the right most bit into the carry
+			rcr cl,1					// rotate the carry into cl
+			cmp ebx,7					// compare counter to 7
+			je lbl_EEND					// if counter is 7 end the loop
+			inc ebx						// else increment count
+			jmp lbl_ELOOP				// and keep looping
+
+	lbl_EEND:
+			mov byte ptr[ebp+8],cl		// move result into parameter
+			pop ecx						// restore ecx
+			pop ebx						// restore ebx
+			pop eax						// restore eax
+			pop ebp						// restore base pointer
+			ret							// return
 
 lbl_EXIT_ZERO_LENGTH :
 			sub ebx, 1		// decrement ebx to -1 to return failure
@@ -168,5 +170,4 @@ lbl_EXIT :
 	}
 
 	return resulti;
-} // decryptData
-			push eax					// save old eax value													|			
+}

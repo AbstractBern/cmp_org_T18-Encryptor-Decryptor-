@@ -114,7 +114,7 @@ _dataLength$ = 12					; size = 4
 ; 19   : 	// access the parameters BEFORE setting up your own stack frame
 ; 20   : 	// Also, you cannot use a lot of global variables - work with registers
 ; 21   : 
-; 22   : 	__asm {
+; 22   : __asm {
 ; 23   : 			mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 
   0003d	8b 35 00 00 00
@@ -128,134 +128,139 @@ _dataLength$ = 12					; size = 4
 
   00045	8a 06		 mov	 al, BYTE PTR [esi]
 
-; 26   : 			mov bl, 256					//
+; 26   : 			shl ax,8					// shift left 8 times equivalent to multiplying by 256
 
-  00047	b3 00		 mov	 bl, 0
+  00047	66 c1 e0 08	 shl	 ax, 8
 
-; 27   : 			mul bl						// multiply al by 256
+; 27   : 			xor ecx,ecx					// set ecx to 0
 
-  00049	f6 e3		 mul	 bl
+  0004b	33 c9		 xor	 ecx, ecx
 
-; 28   : 			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
+; 28   : 			mov cl, byte ptr[esi + 1]	// set cx to gPassword[1]
 
-  0004b	02 46 01	 add	 al, BYTE PTR [esi+1]
+  0004d	8a 4e 01	 mov	 cl, BYTE PTR [esi+1]
 
-; 29   : 			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+; 29   : 			add ax, cx					// add gPassword[1] to ax, ax is now starting index for keyfile
 
-  0004e	a2 00 00 00 00	 mov	 BYTE PTR ?gdebug1@@3EA, al ; gdebug1
+  00050	66 03 c1	 add	 ax, cx
 
-; 30   : 
-; 31   : 			xor ebx, ebx				// ebx = control variable (loop)
+; 30   : 										// ax = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+; 31   : 
+; 32   : 			xor ebx, ebx				// ebx = control variable (loop)
 
   00053	33 db		 xor	 ebx, ebx
 
-; 32   : 			mov ecx, dataLength			// ecx = length
+; 33   : 			xor ecx,ecx
 
-  00055	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
+  00055	33 c9		 xor	 ecx, ecx
 
-; 33   : 			cmp ecx, 0					// check that length is not <= 0
+; 34   : 			mov ecx, dataLength			// ecx = length
 
-  00058	83 f9 00	 cmp	 ecx, 0
+  00057	8b 4d 0c	 mov	 ecx, DWORD PTR _dataLength$[ebp]
 
-; 34   : 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
+; 35   : 			cmp ecx, 0					// check that length is not <= 0
 
-  0005b	83 e9 01	 sub	 ecx, 1
+  0005a	83 f9 00	 cmp	 ecx, 0
 
-; 35   : 			jbe lbl_EXIT_ZERO_LENGTH	//
+; 36   : 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)
 
-  0005e	76 1b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
+  0005d	83 e9 01	 sub	 ecx, 1
 
-; 36   : 
-; 37   : 			mov edi, data				// put address of first byte of data in edi
+; 37   : 			jbe lbl_EXIT_ZERO_LENGTH	//
 
-  00060	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+  00060	76 1b		 jbe	 SHORT $lbl_EXIT_ZERO_LENGTH$3
 
-; 38   : 			mov esi, gptrKey			// put address of gKey into esi
+; 38   : 
+; 39   : 			mov edi, data				// put address of first byte of data in edi
 
-  00063	8b 35 00 00 00
+  00062	8b 7d 08	 mov	 edi, DWORD PTR _data$[ebp]
+
+; 40   : 			mov esi, gptrKey			// put address of gKey into esi
+
+  00065	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
 $lbl_LOOP$4:
 
-; 39   : 
-; 40   : 			//
-; 41   : 			// LOOP THROUGH ENTIRE data[] BYTE BY BYTE
+; 41   : 
 ; 42   : 			//
-; 43   : lbl_LOOP :
-; 44   : 			mov dl, byte ptr[edi + ebx]	//
+; 43   : 			// LOOP THROUGH ENTIRE data[] BYTE BY BYTE
+; 44   : 			//
+; 45   : lbl_LOOP :
+; 46   : 			mov dl, byte ptr[edi + ebx]	//
 
-  00069	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
+  0006b	8a 14 1f	 mov	 dl, BYTE PTR [edi+ebx]
 
-; 45   : 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
+; 47   : 			xor dl, byte ptr[esi + eax]	// data[ebx] = data[ebx] ^ keyfile[starting_index]
 
-  0006c	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
+  0006e	32 14 06	 xor	 dl, BYTE PTR [esi+eax]
 
-; 46   : 			mov byte ptr[edi + ebx], dl	//
+; 48   : 			mov byte ptr[edi + ebx], dl	//
 
-  0006f	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
+  00071	88 14 1f	 mov	 BYTE PTR [edi+ebx], dl
 
-; 47   : 
-; 48   : 			add ebx, 1					// ebx++
+; 49   : 
+; 50   : 			add ebx, 1					// ebx++
 
-  00072	83 c3 01	 add	 ebx, 1
+  00074	83 c3 01	 add	 ebx, 1
 
-; 49   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
+; 51   : 			cmp ebx, ecx				// if(ebx > ecx) end loop
 
-  00075	3b d9		 cmp	 ebx, ecx
+  00077	3b d9		 cmp	 ebx, ecx
 
-; 50   : 			ja lbl_EXIT_END				//
+; 52   : 			ja lbl_EXIT_END				//
 
-  00077	77 07		 ja	 SHORT $lbl_EXIT_END$5
+  00079	77 07		 ja	 SHORT $lbl_EXIT_END$5
 
-; 51   : 			jmp lbl_LOOP				// else loop
+; 53   : 			jmp lbl_LOOP				// else loop
 
-  00079	eb ee		 jmp	 SHORT $lbl_LOOP$4
+  0007b	eb ee		 jmp	 SHORT $lbl_LOOP$4
 $lbl_EXIT_ZERO_LENGTH$3:
 
-; 52   : 
-; 53   : lbl_EXIT_ZERO_LENGTH :
-; 54   : 			sub ebx, 1		// decrement ebx to -1 to return failure
+; 54   : 
+; 55   : lbl_EXIT_ZERO_LENGTH :
+; 56   : 			sub ebx, 1		// decrement ebx to -1 to return failure
 
-  0007b	83 eb 01	 sub	 ebx, 1
+  0007d	83 eb 01	 sub	 ebx, 1
 
-; 55   : 			jmp lbl_EXIT	//
+; 57   : 			jmp lbl_EXIT	//
 
-  0007e	eb 02		 jmp	 SHORT $lbl_EXIT$6
+  00080	eb 02		 jmp	 SHORT $lbl_EXIT$6
 $lbl_EXIT_END$5:
 
-; 56   : 
-; 57   : lbl_EXIT_END :
-; 58   : 			xor ebx, ebx	// ebx = 0, correctly executed
+; 58   : 
+; 59   : lbl_EXIT_END :
+; 60   : 			xor ebx, ebx	// ebx = 0, correctly executed
 
-  00080	33 db		 xor	 ebx, ebx
+  00082	33 db		 xor	 ebx, ebx
 $lbl_EXIT$6:
 
-; 59   : 
-; 60   : lbl_EXIT :
-; 61   : 			mov resulti, ebx
+; 61   : 
+; 62   : lbl_EXIT :
+; 63   : 			mov resulti, ebx
 
-  00082	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
+  00084	89 5d f4	 mov	 DWORD PTR _resulti$[ebp], ebx
 
-; 62   : 	}
-; 63   : 
-; 64   : 	return resulti;
+; 64   : 	}
+; 65   : 
+; 66   : 	return resulti;
 
-  00085	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
+  00087	8b 45 f4	 mov	 eax, DWORD PTR _resulti$[ebp]
 
-; 65   : } // decryptData
+; 67   : } // decryptData
 
-  00088	5f		 pop	 edi
-  00089	5e		 pop	 esi
-  0008a	5b		 pop	 ebx
-  0008b	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
-  0008e	33 cd		 xor	 ecx, ebp
-  00090	e8 00 00 00 00	 call	 @__security_check_cookie@4
-  00095	81 c4 d0 00 00
+  0008a	5f		 pop	 edi
+  0008b	5e		 pop	 esi
+  0008c	5b		 pop	 ebx
+  0008d	8b 4d fc	 mov	 ecx, DWORD PTR __$ArrayPad$[ebp]
+  00090	33 cd		 xor	 ecx, ebp
+  00092	e8 00 00 00 00	 call	 @__security_check_cookie@4
+  00097	81 c4 d0 00 00
 	00		 add	 esp, 208		; 000000d0H
-  0009b	3b ec		 cmp	 ebp, esp
-  0009d	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  000a2	8b e5		 mov	 esp, ebp
-  000a4	5d		 pop	 ebp
-  000a5	c3		 ret	 0
+  0009d	3b ec		 cmp	 ebp, esp
+  0009f	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  000a4	8b e5		 mov	 esp, ebp
+  000a6	5d		 pop	 ebp
+  000a7	c3		 ret	 0
 ?decryptData@@YAHPADH@Z ENDP				; decryptData
 _TEXT	ENDS
 END

@@ -46,7 +46,7 @@ unsigned char gDecodeTable[256] = {
 // Global Variables
 unsigned char gkey[65537];
 unsigned char *gptrKey = gkey;			// used for inline assembly routines, need to access this way for Visual Studio
-char gPassword[256] = "SECRET";
+char gPassword[256] = "password";
 unsigned char gPasswordHash[32];
 unsigned char *gptrPasswordHash = gPasswordHash;	// used for inline assembly routines, need to access this way for Visual Studio
 unsigned char gdebug1, gdebug2;

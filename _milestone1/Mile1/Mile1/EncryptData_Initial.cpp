@@ -23,12 +23,14 @@ int encryptData(char *data, int dataLength)
 			mov esi, gptrPasswordHash	// put address of gPasswordHas into esi
 			xor eax, eax				//
 			mov al, byte ptr[esi]		// store gPassword[0] in al
-			mov bl, 0xFF					//
-			mul bl						// multiply al by 256
-			add al, byte ptr[esi + 1]	// add gPassword[1] to al, al is now starting index for keyfile
-			mov gdebug1, al				// al = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
+			shl ax,8					// shift left 8 times equivalent to multiplying by 256
+			xor ecx,ecx					// set ecx to 0
+			mov cl, byte ptr[esi + 1]	// set cx to gPassword[1]
+			add ax, cx					// add gPassword[1] to ax, ax is now starting index for keyfile
+										// ax = starting_index = gPasswordHash[0] * 256 + gPasswordHash[1]
 
 			xor ebx, ebx				// ebx = control variable (loop)
+			xor ecx,ecx
 			mov ecx, dataLength			// ecx = length
 			cmp ecx, 0					// check that length is not <= 0
 			sub ecx, 1					// ecx-- (file length is 1 less than what we had)

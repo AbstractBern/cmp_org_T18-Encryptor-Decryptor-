@@ -25,9 +25,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="2_testHex.hex" />
+    <None Include="ATest.txt.enc" />
     <None Include="Key.dat" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\..\..\_tester\_test_files\ATest.txt" />
     <Text Include="1_testASCII.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
