@@ -169,7 +169,7 @@ int encryptFile(FILE *fptrIn, FILE *fptrOut)
 
 	fread(buffer, 1, filesize, fptrIn);	// read entire file
 	encryptData(buffer, filesize);
-	fwrite(buffer, 1, filesize, fptrOut);
+                                           	fwrite(buffer, 1, filesize, fptrOut);
 	free(buffer);
 
 	return 0;

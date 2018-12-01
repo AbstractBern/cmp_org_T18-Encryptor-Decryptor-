@@ -2723,7 +2723,7 @@ $LN3@encryptFil:
   000d4	e8 00 00 00 00	 call	 ?encryptData@@YAHPADH@Z	; encryptData
   000d9	83 c4 08	 add	 esp, 8
 
-; 172  : 	fwrite(buffer, 1, filesize, fptrOut);
+; 172  :                                            	fwrite(buffer, 1, filesize, fptrOut);
 
   000dc	8b 45 0c	 mov	 eax, DWORD PTR _fptrOut$[ebp]
   000df	50		 push	 eax
