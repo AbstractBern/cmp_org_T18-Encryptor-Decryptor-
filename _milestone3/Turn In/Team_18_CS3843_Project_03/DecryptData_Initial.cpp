@@ -46,8 +46,7 @@ int decryptData(char *data, int dataLength)
         // set up for main loop
         xor eax,eax // result storer
         xor ebx,ebx // index
-        xor ecx,ecx // round
-        mov ecx,gNumRounds
+        mov ecx,[ebp-12] // round
 
 lbl_LOOP_ROUNDS:
         call calculateStartingIndex
@@ -65,8 +64,8 @@ lbl_LOOP_DATA:
         call stepE
         call stepD
         call stepC
-        call decrementIndex
         call xorByte
+        call incrementIndex
 
         // data loop logic
         cmp ecx,[ebp-4]
@@ -79,9 +78,9 @@ lbl_EXIT_LOOP_DATA:
         // end data loop
 
         // round loop logic
-        dec ecx
         cmp ecx,0
         je lbl_EXIT_LOOP_ROUNDS
+        dec ecx
         jmp lbl_LOOP_ROUNDS
         
 //                      FUNCTIONS
@@ -129,11 +128,9 @@ xorByte:
         pop ebx
         ret
 
-decrementIndex:
-
+incrementIndex:
         mov eax,[ebp-24]    // eax = index
-        sub eax,[ebp-28]    // index -= hopcount
-
+        add eax,[ebp-28]    // index += hopcount
         // fix index if necessary
         cmp eax,65537
         jae lbl_FIX_INDEX   // fix
@@ -141,7 +138,7 @@ decrementIndex:
         ret                 // dont fix
 
     lbl_FIX_INDEX:
-        add eax,65537
+        sub eax,65537
         mov [ebp-24],eax    // set new index
         ret
 

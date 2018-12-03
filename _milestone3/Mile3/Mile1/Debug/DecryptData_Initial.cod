@@ -149,86 +149,85 @@ _dataLength$ = 12					; size = 4
   0003f	8b 15 00 00 00
 	00		 mov	 edx, DWORD PTR ?gNumRounds@@3HA ; gNumRounds
 
-; 36   :         push edx    // store gNumRounds
+; 36   :         dec edx
 
-  00045	52		 push	 edx
+  00045	4a		 dec	 edx
 
-; 37   :         mov esi,gptrPasswordHash    
+; 37   :         push edx    // store gNumRounds
 
-  00046	8b 35 00 00 00
+  00046	52		 push	 edx
+
+; 38   :         mov esi,gptrPasswordHash    
+
+  00047	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrPasswordHash@@3PAEA ; gptrPasswordHash
 
-; 38   :         push esi    // store *password hash
+; 39   :         push esi    // store *password hash
 
-  0004c	56		 push	 esi
+  0004d	56		 push	 esi
 
-; 39   :         mov esi,gptrKey 
+; 40   :         mov esi,gptrKey 
 
-  0004d	8b 35 00 00 00
+  0004e	8b 35 00 00 00
 	00		 mov	 esi, DWORD PTR ?gptrKey@@3PAEA ; gptrKey
 
-; 40   :         push esi    // store *key
+; 41   :         push esi    // store *key
 
-  00053	56		 push	 esi
+  00054	56		 push	 esi
 
-; 41   :         xor eax,eax
+; 42   :         xor eax,eax
 
-  00054	33 c0		 xor	 eax, eax
+  00055	33 c0		 xor	 eax, eax
 
-; 42   :         push eax    // reserve space on stack for starting index
-
-  00056	50		 push	 eax
-
-; 43   :         push eax    // reserve space on stack for hop count
+; 43   :         push eax    // reserve space on stack for starting index
 
   00057	50		 push	 eax
 
-; 44   : 
-; 45   :         // set up for main loop
-; 46   :         xor eax,eax // result storer
+; 44   :         push eax    // reserve space on stack for hop count
 
-  00058	33 c0		 xor	 eax, eax
+  00058	50		 push	 eax
 
-; 47   :         xor ebx,ebx // index
+; 45   : 
+; 46   :         // set up for main loop
+; 47   :         xor eax,eax // result storer
 
-  0005a	33 db		 xor	 ebx, ebx
+  00059	33 c0		 xor	 eax, eax
 
-; 48   :         xor ecx,ecx // round
+; 48   :         xor ebx,ebx // index
 
-  0005c	33 c9		 xor	 ecx, ecx
+  0005b	33 db		 xor	 ebx, ebx
 
-; 49   :         mov ecx,gNumRounds
+; 49   :         mov ecx,[ebp-12] // round
 
-  0005e	8b 0d 00 00 00
-	00		 mov	 ecx, DWORD PTR ?gNumRounds@@3HA ; gNumRounds
+  0005d	8b 4d f4	 mov	 ecx, DWORD PTR [ebp-12]
 $lbl_LOOP_ROUNDS$3:
 
 ; 50   : 
 ; 51   : lbl_LOOP_ROUNDS:
 ; 52   :         call calculateStartingIndex
 
-  00064	e8 46 00 00 00	 call	 $calculateStartingIndex$4
+  00060	e8 46 00 00 00	 call	 $calculateStartingIndex$4
 
 ; 53   :         mov [ebp-24],eax    // store result in the space we allocated previously
 
-  00069	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
+  00065	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
 
 ; 54   :         call calculateHopCount
 
-  0006c	e8 50 00 00 00	 call	 $calculateHopCount$5
+  00068	e8 50 00 00 00	 call	 $calculateHopCount$5
 
 ; 55   :         mov [ebp-28],eax    // store result in the space we allocated previously
 
-  00071	89 45 e4	 mov	 DWORD PTR [ebp-28], eax
+  0006d	89 45 e4	 mov	 DWORD PTR [ebp-28], eax
 
 ; 56   : 
 ; 57   :         push ecx    // save round loop counter
 
-  00074	51		 push	 ecx
+  00070	51		 push	 ecx
 
 ; 58   :         xor ecx,ecx // reset for data loop counter
 
-  00075	33 c9		 xor	 ecx, ecx
+  00071	33 c9		 xor	 ecx, ecx
 $lbl_LOOP_DATA$6:
 
 ; 59   : 
@@ -236,76 +235,76 @@ $lbl_LOOP_DATA$6:
 ; 61   :         // data decryption
 ; 62   :         call stepA
 
-  00077	e8 9a 00 00 00	 call	 $stepA$7
+  00073	e8 98 00 00 00	 call	 $stepA$7
 
 ; 63   :         call stepB
 
-  0007c	e8 b5 00 00 00	 call	 $stepB$8
+  00078	e8 b3 00 00 00	 call	 $stepB$8
 
 ; 64   :         call stepE
 
-  00081	e8 e6 00 00 00	 call	 $stepE$9
+  0007d	e8 e4 00 00 00	 call	 $stepE$9
 
 ; 65   :         call stepD
 
-  00086	e8 c8 00 00 00	 call	 $stepD$10
+  00082	e8 c6 00 00 00	 call	 $stepD$10
 
 ; 66   :         call stepC
 
-  0008b	e8 b6 00 00 00	 call	 $stepC$11
+  00087	e8 b4 00 00 00	 call	 $stepC$11
 
-; 67   :         call decrementIndex
+; 67   :         call xorByte
 
-  00090	e8 65 00 00 00	 call	 $decrementIndex$12
+  0008c	e8 4e 00 00 00	 call	 $xorByte$12
 
-; 68   :         call xorByte
+; 68   :         call incrementIndex
 
-  00095	e8 49 00 00 00	 call	 $xorByte$13
+  00091	e8 60 00 00 00	 call	 $incrementIndex$13
 
 ; 69   : 
 ; 70   :         // data loop logic
 ; 71   :         cmp ecx,[ebp-4]
 
-  0009a	3b 4d fc	 cmp	 ecx, DWORD PTR [ebp-4]
+  00096	3b 4d fc	 cmp	 ecx, DWORD PTR [ebp-4]
 
 ; 72   :         je lbl_EXIT_LOOP_DATA
 
-  0009d	74 03		 je	 SHORT $lbl_EXIT_LOOP_DATA$14
+  00099	74 03		 je	 SHORT $lbl_EXIT_LOOP_DATA$14
 
 ; 73   :         inc ecx
 
-  0009f	41		 inc	 ecx
+  0009b	41		 inc	 ecx
 
 ; 74   :         jmp lbl_LOOP_DATA
 
-  000a0	eb d5		 jmp	 SHORT $lbl_LOOP_DATA$6
+  0009c	eb d5		 jmp	 SHORT $lbl_LOOP_DATA$6
 $lbl_EXIT_LOOP_DATA$14:
 
 ; 75   : 
 ; 76   : lbl_EXIT_LOOP_DATA:
 ; 77   :         pop ecx
 
-  000a2	59		 pop	 ecx
+  0009e	59		 pop	 ecx
 
 ; 78   :         // end data loop
 ; 79   : 
 ; 80   :         // round loop logic
-; 81   :         dec ecx
+; 81   :         cmp ecx,0
 
-  000a3	49		 dec	 ecx
+  0009f	83 f9 00	 cmp	 ecx, 0
 
-; 82   :         cmp ecx,0
+; 82   :         je lbl_EXIT_LOOP_ROUNDS
 
-  000a4	83 f9 00	 cmp	 ecx, 0
-
-; 83   :         je lbl_EXIT_LOOP_ROUNDS
-
-  000a7	0f 84 e1 00 00
+  000a2	0f 84 e0 00 00
 	00		 je	 $lbl_EXIT_LOOP_ROUNDS$15
+
+; 83   :         dec ecx
+
+  000a8	49		 dec	 ecx
 
 ; 84   :         jmp lbl_LOOP_ROUNDS
 
-  000ad	eb b5		 jmp	 SHORT $lbl_LOOP_ROUNDS$3
+  000a9	eb b5		 jmp	 SHORT $lbl_LOOP_ROUNDS$3
 $calculateStartingIndex$4:
 
 ; 85   :         
@@ -314,35 +313,35 @@ $calculateStartingIndex$4:
 ; 88   :         // calc starting index
 ; 89   :         mov esi,[ebp-16]                    // get passHash
 
-  000af	8b 75 f0	 mov	 esi, DWORD PTR [ebp-16]
+  000ab	8b 75 f0	 mov	 esi, DWORD PTR [ebp-16]
 
 ; 90   :         xor eax,eax
 
-  000b2	33 c0		 xor	 eax, eax
+  000ae	33 c0		 xor	 eax, eax
 
 ; 91   :         mov al,byte ptr[esi+ecx*4]          // eax = gPasswordHash[0+round*4]
 
-  000b4	8a 04 8e	 mov	 al, BYTE PTR [esi+ecx*4]
+  000b0	8a 04 8e	 mov	 al, BYTE PTR [esi+ecx*4]
 
 ; 92   :         sal eax,8                           // eax*256
 
-  000b7	c1 e0 08	 shl	 eax, 8
+  000b3	c1 e0 08	 shl	 eax, 8
 
 ; 93   :         inc esi
 
-  000ba	46		 inc	 esi
+  000b6	46		 inc	 esi
 
 ; 94   :         mov bl, byte ptr[esi + ecx * 4]     // ebx = gPasswordHash[1+round*4]
 
-  000bb	8a 1c 8e	 mov	 bl, BYTE PTR [esi+ecx*4]
+  000b7	8a 1c 8e	 mov	 bl, BYTE PTR [esi+ecx*4]
 
 ; 95   :         add eax,ebx
 
-  000be	03 c3		 add	 eax, ebx
+  000ba	03 c3		 add	 eax, ebx
 
 ; 96   :         ret
 
-  000c0	c3		 ret	 0
+  000bc	c3		 ret	 0
 $calculateHopCount$5:
 
 ; 97   :         // end calculateStartingIndex
@@ -351,435 +350,431 @@ $calculateHopCount$5:
 ; 100  :         // calc hop count
 ; 101  :         mov esi,[ebp-16]
 
-  000c1	8b 75 f0	 mov	 esi, DWORD PTR [ebp-16]
+  000bd	8b 75 f0	 mov	 esi, DWORD PTR [ebp-16]
 
 ; 102  :         add esi,2
 
-  000c4	83 c6 02	 add	 esi, 2
+  000c0	83 c6 02	 add	 esi, 2
 
 ; 103  :         xor eax,eax
 
-  000c7	33 c0		 xor	 eax, eax
+  000c3	33 c0		 xor	 eax, eax
 
 ; 104  :         mov al,byte ptr[esi+ecx*4]
 
-  000c9	8a 04 8e	 mov	 al, BYTE PTR [esi+ecx*4]
+  000c5	8a 04 8e	 mov	 al, BYTE PTR [esi+ecx*4]
 
 ; 105  :         sal eax,8
 
-  000cc	c1 e0 08	 shl	 eax, 8
+  000c8	c1 e0 08	 shl	 eax, 8
 
 ; 106  :         inc esi
 
-  000cf	46		 inc	 esi
+  000cb	46		 inc	 esi
 
 ; 107  :         mov bl,byte ptr[esi+ecx*4]
 
-  000d0	8a 1c 8e	 mov	 bl, BYTE PTR [esi+ecx*4]
+  000cc	8a 1c 8e	 mov	 bl, BYTE PTR [esi+ecx*4]
 
 ; 108  :         add eax,ebx
 
-  000d3	03 c3		 add	 eax, ebx
+  000cf	03 c3		 add	 eax, ebx
 
 ; 109  :         // fix hop count if necessary
 ; 110  :         cmp eax,0xFFFF
 
-  000d5	3d ff ff 00 00	 cmp	 eax, 65535		; 0000ffffH
+  000d1	3d ff ff 00 00	 cmp	 eax, 65535		; 0000ffffH
 
 ; 111  :         je lbl_FIX_HOP  // fix
 
-  000da	74 01		 je	 SHORT $lbl_FIX_HOP$16
+  000d6	74 01		 je	 SHORT $lbl_FIX_HOP$16
 
 ; 112  :         ret             // dont fix
 
-  000dc	c3		 ret	 0
+  000d8	c3		 ret	 0
 $lbl_FIX_HOP$16:
 
 ; 113  : 
 ; 114  :     lbl_FIX_HOP:
 ; 115  :         mov eax,0xFFFF
 
-  000dd	b8 ff ff 00 00	 mov	 eax, 65535		; 0000ffffH
+  000d9	b8 ff ff 00 00	 mov	 eax, 65535		; 0000ffffH
 
 ; 116  :         ret
 
-  000e2	c3		 ret	 0
-$xorByte$13:
+  000de	c3		 ret	 0
+$xorByte$12:
 
 ; 117  :         // end calculateHopCount
 ; 118  : 
 ; 119  : xorByte:
 ; 120  :         push ebx
 
-  000e3	53		 push	 ebx
+  000df	53		 push	 ebx
 
 ; 121  :         xor ebx,ebx
 
-  000e4	33 db		 xor	 ebx, ebx
+  000e0	33 db		 xor	 ebx, ebx
 
 ; 122  :         mov ebx,[ebp-24]    // get index from stack frame
 
-  000e6	8b 5d e8	 mov	 ebx, DWORD PTR [ebp-24]
+  000e2	8b 5d e8	 mov	 ebx, DWORD PTR [ebp-24]
 
 ; 123  :         mov esi,[ebp-8]     // get *data from stack frame
 
-  000e9	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  000e5	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
 ; 124  :         mov edi,[ebp-20]    // get *gKey from stack frame
 
-  000ec	8b 7d ec	 mov	 edi, DWORD PTR [ebp-20]
+  000e8	8b 7d ec	 mov	 edi, DWORD PTR [ebp-20]
 
 ; 125  :         mov al,byte ptr[edi+ebx]   // al = gKey[index]
 
-  000ef	8a 04 1f	 mov	 al, BYTE PTR [edi+ebx]
+  000eb	8a 04 1f	 mov	 al, BYTE PTR [edi+ebx]
 
 ; 126  :         xor al,byte ptr[esi+ecx]   // al = al ^ data[x]
 
-  000f2	32 04 0e	 xor	 al, BYTE PTR [esi+ecx]
+  000ee	32 04 0e	 xor	 al, BYTE PTR [esi+ecx]
 
 ; 127  :         mov byte ptr[esi+ecx],al   // update data buffer byte
 
-  000f5	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
+  000f1	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
 
 ; 128  :         pop ebx
 
-  000f8	5b		 pop	 ebx
+  000f4	5b		 pop	 ebx
 
 ; 129  :         ret
 
-  000f9	c3		 ret	 0
-$decrementIndex$12:
+  000f5	c3		 ret	 0
+$incrementIndex$13:
 
 ; 130  : 
-; 131  : decrementIndex:
+; 131  : incrementIndex:
 ; 132  :         mov eax,[ebp-24]    // eax = index
 
-  000fa	8b 45 e8	 mov	 eax, DWORD PTR [ebp-24]
+  000f6	8b 45 e8	 mov	 eax, DWORD PTR [ebp-24]
 
-; 133  :         sub eax,[ebp-28]    // index += hopcount
+; 133  :         add eax,[ebp-28]    // index += hopcount
 
-  000fd	2b 45 e4	 sub	 eax, DWORD PTR [ebp-28]
+  000f9	03 45 e4	 add	 eax, DWORD PTR [ebp-28]
 
 ; 134  :         // fix index if necessary
 ; 135  :         cmp eax,65537
 
-  00100	3d 01 00 01 00	 cmp	 eax, 65537		; 00010001H
+  000fc	3d 01 00 01 00	 cmp	 eax, 65537		; 00010001H
 
 ; 136  :         jae lbl_FIX_INDEX   // fix
 
-  00105	73 04		 jae	 SHORT $lbl_FIX_INDEX$17
+  00101	73 04		 jae	 SHORT $lbl_FIX_INDEX$17
 
 ; 137  :         mov [ebp-24],eax    // set new index
 
-  00107	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
+  00103	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
 
 ; 138  :         ret                 // dont fix
 
-  0010a	c3		 ret	 0
+  00106	c3		 ret	 0
 $lbl_FIX_INDEX$17:
 
 ; 139  : 
 ; 140  :     lbl_FIX_INDEX:
-; 141  :         neg eax
+; 141  :         sub eax,65537
 
-  0010b	f7 d8		 neg	 eax
+  00107	2d 01 00 01 00	 sub	 eax, 65537		; 00010001H
 
-; 142  :         add eax,65537
+; 142  :         mov [ebp-24],eax    // set new index
 
-  0010d	05 01 00 01 00	 add	 eax, 65537		; 00010001H
+  0010c	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
 
-; 143  :         mov [ebp-24],eax    // set new index
+; 143  :         ret
 
-  00112	89 45 e8	 mov	 DWORD PTR [ebp-24], eax
-
-; 144  :         ret
-
-  00115	c3		 ret	 0
+  0010f	c3		 ret	 0
 $stepA$7:
 
-; 145  : 
-; 146  : stepA:		
-; 147  :         push ebx
+; 144  : 
+; 145  : stepA:		
+; 146  :         push ebx
 
-  00116	53		 push	 ebx
+  00110	53		 push	 ebx
 
-; 148  :         xor ebx,ebx
+; 147  :         xor ebx,ebx
 
-  00117	33 db		 xor	 ebx, ebx
+  00111	33 db		 xor	 ebx, ebx
 
-; 149  :         mov esi,[ebp-8]             // get *data
+; 148  :         mov esi,[ebp-8]             // get *data
 
-  00119	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  00113	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
-; 150  : 		mov al,byte ptr[esi+ecx]	// get data[x]		
+; 149  : 		mov al,byte ptr[esi+ecx]	// get data[x]		
 
-  0011c	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
+  00116	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
 
-; 151  :         xor ebx,ebx
+; 150  :         xor ebx,ebx
 
-  0011f	33 db		 xor	 ebx, ebx
+  00119	33 db		 xor	 ebx, ebx
 
-; 152  : 		mov bh,0xAA					// 0xAA has all even bits 1 and odd 0,								
+; 151  : 		mov bh,0xAA					// 0xAA has all even bits 1 and odd 0,								
 
-  00121	b7 aa		 mov	 bh, -86			; ffffffaaH
+  0011b	b7 aa		 mov	 bh, -86			; ffffffaaH
 
-; 153  : 									// bitwise and with this value will result in showing all even bits	
-; 154  : 		and bh,al					// bh is now all the even bits of our byte							
+; 152  : 									// bitwise and with this value will result in showing all even bits	
+; 153  : 		and bh,al					// bh is now all the even bits of our byte							
 
-  00123	22 f8		 and	 bh, al
+  0011d	22 f8		 and	 bh, al
 
-; 155  : 		mov bl,0x55					// 0x55 has all even bits 0 and odd 1,								
+; 154  : 		mov bl,0x55					// 0x55 has all even bits 0 and odd 1,								
 
-  00125	b3 55		 mov	 bl, 85			; 00000055H
+  0011f	b3 55		 mov	 bl, 85			; 00000055H
 
-; 156  : 									// bitwise and with this value will result in showing all odd bits		
-; 157  : 		and bl,al					// bl is not all the odd bits of our byte							
+; 155  : 									// bitwise and with this value will result in showing all odd bits		
+; 156  : 		and bl,al					// bl is not all the odd bits of our byte							
 
-  00127	22 d8		 and	 bl, al
+  00121	22 d8		 and	 bl, al
 
-; 158  : 		shr bh,1					// shift all even bits right 1 time	
+; 157  : 		shr bh,1					// shift all even bits right 1 time	
 
-  00129	d0 ef		 shr	 bh, 1
+  00123	d0 ef		 shr	 bh, 1
 
-; 159  : 		shl bl,1					// shift all odd bits left 1 time										
+; 158  : 		shl bl,1					// shift all odd bits left 1 time										
 
-  0012b	d0 e3		 shl	 bl, 1
+  00125	d0 e3		 shl	 bl, 1
 
-; 160  : 		or bl,bh					// combine them back together									
+; 159  : 		or bl,bh					// combine them back together									
 
-  0012d	0a df		 or	 bl, bh
+  00127	0a df		 or	 bl, bh
 
-; 161  : 		mov al,bl                   // al is now out byte with even and odd bits swapped
+; 160  : 		mov al,bl                   // al is now out byte with even and odd bits swapped
 
-  0012f	8a c3		 mov	 al, bl
+  00129	8a c3		 mov	 al, bl
 
-; 162  :         mov byte ptr[esi+ecx],al    // update data buffer byte
+; 161  :         mov byte ptr[esi+ecx],al    // update data buffer byte
 
-  00131	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
+  0012b	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
 
-; 163  :         pop ebx
+; 162  :         pop ebx
 
-  00134	5b		 pop	 ebx
+  0012e	5b		 pop	 ebx
 
-; 164  :         ret
+; 163  :         ret
 
-  00135	c3		 ret	 0
+  0012f	c3		 ret	 0
 $stepB$8:
 
-; 165  : 
-; 166  : stepB:
-; 167  :         push ebx
+; 164  : 
+; 165  : stepB:
+; 166  :         push ebx
 
-  00136	53		 push	 ebx
+  00130	53		 push	 ebx
 
-; 168  :         xor ebx,ebx
+; 167  :         xor ebx,ebx
 
-  00137	33 db		 xor	 ebx, ebx
+  00131	33 db		 xor	 ebx, ebx
 
-; 169  : 		mov esi,[ebp-8]             // get *data
+; 168  : 		mov esi,[ebp-8]             // get *data
 
-  00139	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  00133	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
-; 170  :         mov al, byte ptr[esi+ecx]	// get data[x]	
+; 169  :         mov al, byte ptr[esi+ecx]	// get data[x]	
 
-  0013c	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
+  00136	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
 
-; 171  : 		xor al,00111100b			// this inverts the middle 4 bits			
+; 170  : 		xor al,00111100b			// this inverts the middle 4 bits			
 
-  0013f	34 3c		 xor	 al, 60			; 0000003cH
+  00139	34 3c		 xor	 al, 60			; 0000003cH
 
-; 172  : 		mov byte ptr[esi+ecx],al    // update data buffer byte
+; 171  : 		mov byte ptr[esi+ecx],al    // update data buffer byte
 
-  00141	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
+  0013b	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
 
-; 173  : 	    pop ebx
+; 172  : 	    pop ebx
 
-  00144	5b		 pop	 ebx
+  0013e	5b		 pop	 ebx
 
-; 174  :         ret
+; 173  :         ret
 
-  00145	c3		 ret	 0
+  0013f	c3		 ret	 0
 $stepC$11:
 
-; 175  : 
-; 176  : stepC:
-; 177  : 		mov esi,[ebp-8]             // get *data
+; 174  : 
+; 175  : stepC:
+; 176  : 		mov esi,[ebp-8]             // get *data
 
-  00146	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  00140	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
-; 178  :         mov al,byte ptr[esi+ecx]	// get data[x]
+; 177  :         mov al,byte ptr[esi+ecx]	// get data[x]
 
-  00149	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
+  00143	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
 
-; 179  :         ror al,4                    // rotate 4 to right
+; 178  :         ror al,4                    // rotate 4 to right
 
-  0014c	c0 c8 04	 ror	 al, 4
+  00146	c0 c8 04	 ror	 al, 4
 
-; 180  :         mov byte ptr[esi+ecx],al    // update data buffer byte
+; 179  :         mov byte ptr[esi+ecx],al    // update data buffer byte
 
-  0014f	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
+  00149	88 04 0e	 mov	 BYTE PTR [esi+ecx], al
 
-; 181  :         ret
+; 180  :         ret
 
-  00152	c3		 ret	 0
+  0014c	c3		 ret	 0
 $stepD$10:
 
-; 182  : 
-; 183  : stepD:
-; 184  :         mov esi,[ebp-8]             // get *data
+; 181  : 
+; 182  : stepD:
+; 183  :         mov esi,[ebp-8]             // get *data
 
-  00153	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  0014d	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
-; 185  :         xor eax,eax
+; 184  :         xor eax,eax
 
-  00156	33 c0		 xor	 eax, eax
+  00150	33 c0		 xor	 eax, eax
 
-; 186  :         push ebx
+; 185  :         push ebx
 
-  00158	53		 push	 ebx
+  00152	53		 push	 ebx
 
-; 187  :         xor ebx,ebx
+; 186  :         xor ebx,ebx
 
-  00159	33 db		 xor	 ebx, ebx
+  00153	33 db		 xor	 ebx, ebx
 
-; 188  :         mov al,byte ptr[esi+ecx]	// get data[x]
+; 187  :         mov al,byte ptr[esi+ecx]	// get data[x]
 
-  0015b	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
+  00155	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
 
-; 189  : 		lea edi, gDecodeTable		// put the address of the first byte of gEncodeTable into esi
+; 188  : 		lea edi, gDecodeTable		// put the address of the first byte of gEncodeTable into esi
 
-  0015e	8d 3d 00 00 00
+  00158	8d 3d 00 00 00
 	00		 lea	 edi, OFFSET ?gDecodeTable@@3PAEA
 
-; 190  : 		mov bl, byte ptr[edi+eax]	// copy the value at the index al from gEncodeTable (gEncodeTable[al])
+; 189  : 		mov bl, byte ptr[edi+eax]	// copy the value at the index al from gEncodeTable (gEncodeTable[al])
 
-  00164	8a 1c 07	 mov	 bl, BYTE PTR [edi+eax]
+  0015e	8a 1c 07	 mov	 bl, BYTE PTR [edi+eax]
 
-; 191  :         mov byte ptr[esi + ecx],bl  // update data buffer byte
+; 190  :         mov byte ptr[esi + ecx],bl  // update data buffer byte
 
-  00167	88 1c 0e	 mov	 BYTE PTR [esi+ecx], bl
+  00161	88 1c 0e	 mov	 BYTE PTR [esi+ecx], bl
 
-; 192  :         pop ebx
+; 191  :         pop ebx
 
-  0016a	5b		 pop	 ebx
+  00164	5b		 pop	 ebx
 
-; 193  :         ret
+; 192  :         ret
 
-  0016b	c3		 ret	 0
+  00165	c3		 ret	 0
 $stepE$9:
 
-; 194  : 
-; 195  : stepE: 
-; 196  : 		push ebx					// save old ebx value
+; 193  : 
+; 194  : stepE: 
+; 195  : 		push ebx					// save old ebx value
 
-  0016c	53		 push	 ebx
+  00166	53		 push	 ebx
 
-; 197  : 		push edx					// save old ecx value
+; 196  : 		push edx					// save old ecx value
 
-  0016d	52		 push	 edx
+  00167	52		 push	 edx
 
-; 198  :         xor eax,eax
+; 197  :         xor eax,eax
 
-  0016e	33 c0		 xor	 eax, eax
+  00168	33 c0		 xor	 eax, eax
 
-; 199  :         mov esi,[ebp-8]             // get *data
+; 198  :         mov esi,[ebp-8]             // get *data
 
-  00170	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
+  0016a	8b 75 f8	 mov	 esi, DWORD PTR [ebp-8]
 
-; 200  :         mov al,byte ptr[esi+ecx]	// get data[x]
+; 199  :         mov al,byte ptr[esi+ecx]	// get data[x]
 
-  00173	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
+  0016d	8a 04 0e	 mov	 al, BYTE PTR [esi+ecx]
 
-; 201  : 		xor ebx,ebx					// set ebx to 0, will be our counter
+; 200  : 		xor ebx,ebx					// set ebx to 0, will be our counter
 
-  00176	33 db		 xor	 ebx, ebx
+  00170	33 db		 xor	 ebx, ebx
 
-; 202  : 		xor edx,edx					// set ecx to 0, will be the new reversed value
+; 201  : 		xor edx,edx					// set ecx to 0, will be the new reversed value
 
-  00178	33 d2		 xor	 edx, edx
+  00172	33 d2		 xor	 edx, edx
 
-; 203  : 		jmp lbl_ELOOP				// start looping
+; 202  : 		jmp lbl_ELOOP				// start looping
 
-  0017a	eb 00		 jmp	 SHORT $lbl_ELOOP$18
+  00174	eb 00		 jmp	 SHORT $lbl_ELOOP$18
 $lbl_ELOOP$18:
 
-; 204  : 			
-; 205  : 	lbl_ELOOP:
-; 206  : 			shl al,1					// shift the right most bit into the carry
+; 203  : 			
+; 204  : 	lbl_ELOOP:
+; 205  : 			shl al,1					// shift the right most bit into the carry
 
-  0017c	d0 e0		 shl	 al, 1
+  00176	d0 e0		 shl	 al, 1
 
-; 207  : 			rcr dl,1					// rotate the carry into dl
+; 206  : 			rcr dl,1					// rotate the carry into dl
 
-  0017e	d0 da		 rcr	 dl, 1
+  00178	d0 da		 rcr	 dl, 1
 
-; 208  : 			cmp ebx,7					// compare counter to 7
+; 207  : 			cmp ebx,7					// compare counter to 7
 
-  00180	83 fb 07	 cmp	 ebx, 7
+  0017a	83 fb 07	 cmp	 ebx, 7
 
-; 209  : 			je lbl_EEND					// if counter is 7 end the loop
+; 208  : 			je lbl_EEND					// if counter is 7 end the loop
 
-  00183	74 03		 je	 SHORT $lbl_EEND$19
+  0017d	74 03		 je	 SHORT $lbl_EEND$19
 
-; 210  : 			inc ebx						// else increment count
+; 209  : 			inc ebx						// else increment count
 
-  00185	43		 inc	 ebx
+  0017f	43		 inc	 ebx
 
-; 211  : 			jmp lbl_ELOOP				// and keep looping
+; 210  : 			jmp lbl_ELOOP				// and keep looping
 
-  00186	eb f4		 jmp	 SHORT $lbl_ELOOP$18
+  00180	eb f4		 jmp	 SHORT $lbl_ELOOP$18
 $lbl_EEND$19:
 
-; 212  : 
-; 213  : 	lbl_EEND:
-; 214  : 			mov byte ptr[esi + ecx],dl  // update data buffer byte
+; 211  : 
+; 212  : 	lbl_EEND:
+; 213  : 			mov byte ptr[esi + ecx],dl  // update data buffer byte
 
-  00188	88 14 0e	 mov	 BYTE PTR [esi+ecx], dl
+  00182	88 14 0e	 mov	 BYTE PTR [esi+ecx], dl
 
-; 215  : 			pop edx						// restore ecx
+; 214  : 			pop edx						// restore ecx
 
-  0018b	5a		 pop	 edx
+  00185	5a		 pop	 edx
 
-; 216  : 			pop ebx						// restore ebx
+; 215  : 			pop ebx						// restore ebx
 
-  0018c	5b		 pop	 ebx
+  00186	5b		 pop	 ebx
 
-; 217  : 			ret							// return
+; 216  : 			ret							// return
 
-  0018d	c3		 ret	 0
+  00187	c3		 ret	 0
 $lbl_EXIT_LOOP_ROUNDS$15:
 
-; 218  : 
-; 219  : //                      END FUNCTIONS
-; 220  : 
-; 221  : lbl_EXIT_LOOP_ROUNDS:
-; 222  :         // end round loop, end assembly
-; 223  :         add esp,28
+; 217  : 
+; 218  : //                      END FUNCTIONS
+; 219  : 
+; 220  : lbl_EXIT_LOOP_ROUNDS:
+; 221  :         // end round loop, end assembly
+; 222  :         add esp,28
 
-  0018e	83 c4 1c	 add	 esp, 28			; 0000001cH
+  00188	83 c4 1c	 add	 esp, 28			; 0000001cH
 
-; 224  :         pop ebp
+; 223  :         pop ebp
 
-  00191	5d		 pop	 ebp
+  0018b	5d		 pop	 ebp
 
-; 225  : 	}
-; 226  : 
-; 227  : 	return resulti;
+; 224  : 	}
+; 225  : 
+; 226  : 	return resulti;
 
-  00192	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
+  0018c	8b 45 f8	 mov	 eax, DWORD PTR _resulti$[ebp]
 
-; 228  : }
+; 227  : }
 
-  00195	5f		 pop	 edi
-  00196	5e		 pop	 esi
-  00197	5b		 pop	 ebx
-  00198	81 c4 cc 00 00
+  0018f	5f		 pop	 edi
+  00190	5e		 pop	 esi
+  00191	5b		 pop	 ebx
+  00192	81 c4 cc 00 00
 	00		 add	 esp, 204		; 000000ccH
-  0019e	3b ec		 cmp	 ebp, esp
-  001a0	e8 00 00 00 00	 call	 __RTC_CheckEsp
-  001a5	8b e5		 mov	 esp, ebp
-  001a7	5d		 pop	 ebp
-  001a8	c3		 ret	 0
+  00198	3b ec		 cmp	 ebp, esp
+  0019a	e8 00 00 00 00	 call	 __RTC_CheckEsp
+  0019f	8b e5		 mov	 esp, ebp
+  001a1	5d		 pop	 ebp
+  001a2	c3		 ret	 0
 ?decryptData@@YAHPADH@Z ENDP				; decryptData
 _TEXT	ENDS
 END

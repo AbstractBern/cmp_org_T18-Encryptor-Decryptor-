@@ -51,6 +51,12 @@
     <None Include="ATest.txt.enc">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Frustration.gif_M03_R01_18_CDEBA.enc">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Z_Frustration.gif_M03_R03_18_CDEBA.enc">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="1_testASCII.txt">
