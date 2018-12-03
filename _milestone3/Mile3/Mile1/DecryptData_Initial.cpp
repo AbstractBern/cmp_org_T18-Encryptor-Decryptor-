@@ -107,7 +107,7 @@ calculateHopCount:
         mov bl,byte ptr[esi+ecx*4]
         add eax,ebx
         // fix hop count if necessary
-        cmp eax,0xFFFF
+        cmp eax,0
         je lbl_FIX_HOP  // fix
         ret             // dont fix
 
