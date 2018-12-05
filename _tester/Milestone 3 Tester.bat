@@ -4,7 +4,7 @@ set exec=Team_18_CS3843_Project_03.exe
 
 set testfile=_test_files\AfterDebugging.jpg
 set outenc=_m3_results\AfterDebugging.jpg.enc
-set outdec=_m3_results\AfterDebugging.jpg.enc.dec
+set outdec=_m3_results\AfterDebugging.jpg.enc.dec.jpg
 set testfileenc=_test_files\Mile#3\AfterDebugging.jpg_M03_R01_18_CDEBA.enc
 
 echo Encrypt on "AfterDebugging.jpg"
@@ -28,7 +28,7 @@ echo.
 
 set testfile=_test_files\ATest.txt
 set outenc=_m3_results\ATest.txt.enc
-set outdec=_m3_results\ATest.txt.enc.dec
+set outdec=_m3_results\ATest.txt.enc.dec.txt
 set testfileenc=_test_files\Mile#3\ATest.txt_M03_R01_18_CDEBA.enc
 
 echo Encrypt on "ATest.txt"
@@ -51,7 +51,7 @@ echo.
 
 set testfile=_test_files\Frustration.gif
 set outenc=_m3_results\Frustration.gif.enc
-set outdec=_m3_results\Frustration.gif.enc.dec
+set outdec=_m3_results\Frustration.gif.enc.dec.gif
 set testfileenc=_test_files\Mile#3\Frustration.gif_M03_R01_18_CDEBA.enc
 
 echo Encrypt on "ATest.txt"
@@ -74,7 +74,7 @@ echo.
 
 set testfile=_test_files\Truth.mp3
 set outenc=_m3_results\Truth.mp3.enc
-set outdec=_m3_results\Truth.mp3.enc.dec
+set outdec=_m3_results\Truth.mp3.enc.dec.mp3
 set testfileenc=_test_files\Mile#3\Truth.mp3_M03_R02_18_CDEBA.enc
 
 echo Encrypt on "ATest.txt"
@@ -97,7 +97,7 @@ echo.
 
 set testfile=_test_files\Z_Frustration.gif
 set outenc=_m3_results\Z_Frustration.gif.enc
-set outdec=_m3_results\Z_Frustration.gif.enc.dec
+set outdec=_m3_results\Z_Frustration.gif.enc.dec.gif
 set testfileenc=_test_files\Mile#3\Z_Frustration.gif_M03_R03_18_CDEBA.enc
 
 echo Encrypt on "ATest.txt"
